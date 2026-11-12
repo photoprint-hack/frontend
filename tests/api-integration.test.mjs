@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -36,6 +36,28 @@ await build({
   define: { 'import.meta.env': JSON.stringify({ VITE_API_URL: `http://127.0.0.1:${address.port}/api/v1`, VITE_USE_MOCKS: 'false' }) },
 });
 const api = createRequire(import.meta.url)(path.join(output, 'api.cjs'));
+// Render the actual production canvas in Node; export its existing local function
+// only in this test bundle. No browser session or copied renderer is involved.
+const canvasDir = path.join(root, 'src/features/impact-map');
+await build({
+  stdin: { contents: (await readFile(path.join(canvasDir, 'ImpactMapPage.tsx'), 'utf8')) + "\nexport { ImpactCanvas }; export { createElement } from 'react'; export { renderToStaticMarkup } from 'react-dom/server';", resolveDir: canvasDir, loader: 'tsx' },
+  absWorkingDir: root, tsconfig: path.join(root, 'tsconfig.json'), bundle: true,
+  platform: 'node', format: 'cjs', outfile: path.join(output, 'canvas.cjs'),
+  define: { 'import.meta.env': JSON.stringify({ VITE_API_URL: 'http://localhost/api/v1', VITE_USE_MOCKS: 'false' }) },
+});
+const canvas = createRequire(import.meta.url)(path.join(output, 'canvas.cjs'));
+function assertCanvasDraws(graph) {
+  const markup = canvas.renderToStaticMarkup(canvas.createElement(canvas.ImpactCanvas, {
+    graph, selectedNode: null, selectedEdge: null, showAllEdges: true, path: null,
+    onNode() {}, onEdge() {},
+  }));
+  assert.equal((markup.match(/data-map-node="true"/g) ?? []).length, graph.nodes.length,
+    'Every API node must reach the real SVG renderer');
+  assert.equal((markup.match(/data-map-edge="true"/g) ?? []).length, graph.edges.length,
+    'Every valid API edge must reach the real SVG renderer');
+  assert.doesNotMatch(markup, /NaN|Infinity/);
+}
+
 after(async () => { server.closeAllConnections(); await new Promise((resolve) => server.close(resolve)); await rm(output, { recursive: true, force: true }); });
 const page = (items, number = 1, pages = 1) => ({ items, total: pages === 1 ? items.length : 101, page: number, page_size: 100, pages });
 const node = { id: 'metric-node', type: 'metric', label: 'Revenue', description: 'Revenue',
@@ -196,4 +218,29 @@ test('chart ranges match backend limits and zero is retained while null creates 
   assert.equal((graph.actual.match(/M/g) ?? []).length, 2);
   assert.equal(graph.actual.includes('NaN'), false);
   assert.equal(api.lineGeometry([{ actual: null, target: null }]).hasData, false);
+});
+
+
+test('API overview without positions renders its nodes and edges in the real canvas', async () => {
+  const wire = { ...graph, nodes: [node, { ...node, id: 'risk-node', type: 'risk', label: 'Risk', entity_ref: null }] };
+  handle = () => ({ data: wire });
+  const response = await api.impactMapApi.get();
+  assertCanvasDraws(response.data);
+});
+
+test('API neighborhood reuses the focused layout with the chosen KPI visible', async () => {
+  const wire = { ...graph, nodes: [node, { ...node, id: 'risk-node', type: 'risk', label: 'Risk', entity_ref: null }] };
+  handle = () => ({ data: wire });
+  const response = await api.impactMapApi.neighbors(node.id, { depth: 2 });
+  assertCanvasDraws(response.data);
+  assert.deepEqual(response.data.nodes.find((item) => item.id === node.id).position, { x: 800, y: 460 });
+});
+
+test('API path nodes have usable positions and preserve server IDs and edges', async () => {
+  const wire = { ...graph, nodes: [node, { ...node, id: 'risk-node', type: 'risk', label: 'Risk', entity_ref: null }] };
+  handle = () => ({ data: wire });
+  const response = await api.impactMapApi.path({ from_node_id: node.id, to_node_id: 'risk-node', depth: 2, direction: 'out' });
+  assert.equal(response.data.found, true);
+  assert.deepEqual(response.data.nodes.map((item) => item.id), wire.nodes.map((item) => item.id));
+  assertCanvasDraws(response.data);
 });

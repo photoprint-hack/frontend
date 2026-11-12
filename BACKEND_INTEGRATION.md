@@ -65,7 +65,9 @@ Blueprint Backend не меняет окружение сервиса, созд�
   получает период и область. После проверки источники перечитываются.
 
 Карта использует data.node, код KPI из entity_ref.id, факты из metadata,
-источник связи из evidence_source. edge_types сериализуется повторяющимися
+источник связи из evidence_source. Координаты для API-узлов вычисляет общий
+frontend-модуль features/impact-map/layout.ts: прежний обзор по типам и
+фокус neighbors вокруг выбранного KPI. Backend не обязан присылать position. edge_types сериализуется повторяющимися
 query-параметрами. AI получает request_key UUIDv4 в JSON, graph_revision и только
 четыре бизнес-фильтра в context. Ответ читается из data.analysis; timeout — 120 секунд.
 

@@ -340,7 +340,7 @@ export const impactMapApi = {
   async neighbors(id: string, params?: Params) {
     if (USE_MOCKS) return http.get<{ data: ImpactGraph }>(`/impact-map/nodes/${id}/neighbors`, { params });
     const response = await http.get<{ data: ServerGraph }>(`/impact-map/nodes/${id}/neighbors`, { params: graphParams(params) });
-    return { data: adaptGraph(response.data) };
+    return { data: adaptGraph(response.data, { nodeId: id, depth: Number(params?.depth ?? 1) }) };
   },
   async path(params: { from_node_id: string; to_node_id: string; depth: number; direction: string } & Record<string, unknown>) {
     if (USE_MOCKS) return http.get<{ data: ImpactPath }>('/impact-map/paths', { params });

@@ -1,3 +1,4 @@
+import { layoutFocusedGraph, layoutOverviewNodes } from '@/features/impact-map/layout';
 import type { ImpactAnalysis, ImpactContext, ImpactEdge, ImpactGraph, ImpactNode } from '@/features/impact-map/types';
 
 export type ServerNode = Omit<ImpactNode, 'entity_ref'> & {
@@ -43,12 +44,15 @@ export function adaptNode(node: ServerNode): ImpactNode {
   };
 }
 
-export function adaptGraph(graph: ServerGraph): ImpactGraph {
-  return {
+export function adaptGraph(graph: ServerGraph, focus?: { nodeId: string; depth: number }): ImpactGraph {
+  const mapped: ImpactGraph = {
     ...graph,
     nodes: graph.nodes.map(adaptNode),
     edges: graph.edges.map((edge) => ({ ...edge, source_label: edge.evidence_source })),
   };
+  return focus
+    ? layoutFocusedGraph(mapped, focus.nodeId, focus.depth)
+    : { ...mapped, nodes: layoutOverviewNodes(mapped.nodes) };
 }
 
 export function adaptAnalysis(response: ServerAnalysis): ImpactAnalysis {
