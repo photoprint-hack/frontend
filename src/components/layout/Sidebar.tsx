@@ -1,11 +1,11 @@
 import { NavLink } from 'react-router-dom';
 import {
-  Activity,
   AlertTriangle,
   BarChart3,
   Building2,
   CalendarClock,
   ClipboardCheck,
+  Compass,
   Database,
   FileClock,
   Gauge,
@@ -92,11 +92,11 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         <div className="flex h-14 items-center justify-between gap-2 border-b border-ink-700/70 px-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-500/15 ring-1 ring-accent-400/40">
-              <Activity className="h-4 w-4 text-accent-300" aria-hidden />
+              <Compass className="h-4 w-4 text-accent-300" aria-hidden />
             </div>
             <div className="leading-tight">
-              <p className="text-sm font-semibold tracking-tight text-ink-50">Фотопринт</p>
-              <p className="text-[0.625rem] uppercase tracking-[0.16em] text-ink-400">Management OS</p>
+              <p className="text-sm font-semibold tracking-tight text-ink-50">Компас</p>
+              <p className="text-[0.625rem] text-ink-400">ООО «Фотопринт»</p>
             </div>
           </div>
           <button

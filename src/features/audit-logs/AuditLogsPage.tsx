@@ -195,10 +195,11 @@ export function AuditLogsPage() {
           columns={columns}
           rows={query.data?.items}
           rowKey={(row) => row.id}
+          selectedRowKey={selected?.id}
           loading={query.isLoading}
           onRowClick={(row) => setSelected(row)}
           emptyTitle="Записей нет"
-          emptyDescription="Измените фильтры — журнал заполняется автоматически при действиях в системе."
+          emptyDescription="Измените фильтры — журнал заполняется автоматически при действиях в системе. Нажмите на запись, чтобы раскрыть детали ниже."
           footer={
             query.data ? (
               <Pagination
@@ -233,7 +234,7 @@ export function AuditLogsPage() {
         {!selected ? (
           <EmptyState
             title="Запись не выбрана"
-            description="Нажмите на строку журнала, чтобы увидеть изменения old/new и служебные данные запроса."
+            description="Нажмите на строку журнала: выбранная запись подсветится, а здесь появятся изменения и данные запроса."
             icon={<ShieldCheck className="h-5 w-5" />}
           />
         ) : (

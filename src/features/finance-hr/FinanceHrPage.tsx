@@ -105,7 +105,7 @@ export function FinanceHrPage() {
   const hrData = hr.data;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <PageHeader
         title="Финансы и персонал"
         description="БДР и БДДС план/факт, валовая маржа, операционные расходы и обеспеченность персоналом по последнему снимку HR."
@@ -129,6 +129,87 @@ export function FinanceHrPage() {
       />
 
       <GlobalFilters />
+
+      {hrData && (
+        <Card>
+          <CardHeader
+            title="Персонал и обеспеченность"
+            subtitle={
+              hrData.snapshot_dates.length > 0
+                ? `Снимок HR на ${formatDate(hrData.snapshot_dates[hrData.snapshot_dates.length - 1])}`
+                : 'Снимки HR за выбранный период отсутствуют'
+            }
+            icon={<Users className="h-4 w-4" />}
+            action={
+              <Link to="/metrics/staffing_coverage">
+                <Button size="sm" variant="outline">
+                  Показатель
+                </Button>
+              </Link>
+            }
+          />
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
+            {[
+              { label: 'План штата', hint: 'Сколько сотрудников предусмотрено штатным планом', value: formatNumber(hrData.planned_headcount) },
+              { label: 'Факт штата', hint: 'Сколько сотрудников числится в штате', value: formatNumber(hrData.actual_headcount) },
+              { label: 'Доступно', hint: 'Сотрудники, доступные для работы сейчас', value: formatNumber(hrData.available_headcount) },
+              { label: 'Требуется', hint: 'Сколько сотрудников нужно для плановой работы', value: formatNumber(hrData.required_headcount) },
+              { label: 'Вакансии', hint: 'Незакрытые позиции по кадровому плану', value: formatNumber(hrData.vacancies_count) },
+              { label: 'Отсутствия', hint: 'Сотрудники, временно отсутствующие на работе', value: formatNumber(hrData.absences_count) },
+            ].map((tile) => (
+              <div key={tile.label} title={tile.hint} className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-2.5">
+                <p className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{tile.label}</p>
+                <p className="mt-1 text-base font-semibold leading-none text-ink-50">{tile.value}</p>
+                <p className="mt-1 text-[0.625rem] leading-snug text-ink-500">{tile.hint}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-ink-700/70 bg-ink-850/50 p-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-accent-300" aria-hidden />
+                <span className="text-xs font-medium text-ink-100">Обеспеченность персоналом</span>
+              </div>
+              <p className="ml-6 mt-0.5 text-[0.625rem] text-ink-500">Фактический штат относительно потребности</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-40 overflow-hidden rounded-full bg-ink-700/70">
+                <div
+                  className={cn(
+                    'h-full rounded-full',
+                    (hrData.staffing_coverage_percent ?? 0) >= 95
+                      ? 'bg-signal-ok'
+                      : (hrData.staffing_coverage_percent ?? 0) >= 85
+                        ? 'bg-signal-warn'
+                        : 'bg-signal-bad',
+                  )}
+                  style={{ width: `${Math.min(100, Math.max(0, hrData.staffing_coverage_percent ?? 0))}%` }}
+                />
+              </div>
+              <Badge
+                tone={
+                  hrData.staffing_coverage_percent === null
+                    ? 'idle'
+                    : hrData.staffing_coverage_percent >= 95
+                      ? 'ok'
+                      : hrData.staffing_coverage_percent >= 85
+                        ? 'warn'
+                        : 'bad'
+                }
+              >
+                {formatPercent(hrData.staffing_coverage_percent)}
+              </Badge>
+            </div>
+          </div>
+
+          {hrData.context.ignored_filters.includes('product_id') && (
+            <p className="mt-2 text-[0.6875rem] text-ink-500">
+              Кадровые показатели не детализируются по продукту — фильтр продукта игнорируется.
+            </p>
+          )}
+        </Card>
+      )}
 
       {(finance.isLoading || hr.isLoading) && <CardSkeletonGrid count={6} />}
       {error && (
@@ -209,82 +290,6 @@ export function FinanceHrPage() {
         </>
       )}
 
-      {hrData && (
-        <Card>
-          <CardHeader
-            title="Персонал и обеспеченность"
-            subtitle={
-              hrData.snapshot_dates.length > 0
-                ? `Последний снимок HR: ${formatDate(hrData.snapshot_dates[hrData.snapshot_dates.length - 1])}`
-                : 'Снимки HR за выбранный период отсутствуют'
-            }
-            icon={<Users className="h-4 w-4" />}
-            action={
-              <Link to="/metrics/staffing_coverage">
-                <Button size="sm" variant="outline">
-                  Показатель
-                </Button>
-              </Link>
-            }
-          />
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-6">
-            {[
-              { label: 'План штата', value: formatNumber(hrData.planned_headcount) },
-              { label: 'Факт штата', value: formatNumber(hrData.actual_headcount) },
-              { label: 'Доступно', value: formatNumber(hrData.available_headcount) },
-              { label: 'Требуется', value: formatNumber(hrData.required_headcount) },
-              { label: 'Вакансии', value: formatNumber(hrData.vacancies_count) },
-              { label: 'Отсутствия', value: formatNumber(hrData.absences_count) },
-            ].map((tile) => (
-              <div key={tile.label} className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-2.5">
-                <p className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{tile.label}</p>
-                <p className="mt-1 text-base font-semibold leading-none text-ink-50">{tile.value}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-ink-700/70 bg-ink-850/50 p-3">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-accent-300" aria-hidden />
-              <span className="text-xs text-ink-200">Обеспеченность персоналом</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-40 overflow-hidden rounded-full bg-ink-700/70">
-                <div
-                  className={cn(
-                    'h-full rounded-full',
-                    (hrData.staffing_coverage_percent ?? 0) >= 95
-                      ? 'bg-signal-ok'
-                      : (hrData.staffing_coverage_percent ?? 0) >= 85
-                        ? 'bg-signal-warn'
-                        : 'bg-signal-bad',
-                  )}
-                  style={{ width: `${Math.min(100, Math.max(0, hrData.staffing_coverage_percent ?? 0))}%` }}
-                />
-              </div>
-              <Badge
-                tone={
-                  hrData.staffing_coverage_percent === null
-                    ? 'idle'
-                    : hrData.staffing_coverage_percent >= 95
-                      ? 'ok'
-                      : hrData.staffing_coverage_percent >= 85
-                        ? 'warn'
-                        : 'bad'
-                }
-              >
-                {formatPercent(hrData.staffing_coverage_percent)}
-              </Badge>
-            </div>
-          </div>
-
-          {hrData.context.ignored_filters.includes('product_id') && (
-            <p className="mt-2 text-[0.6875rem] text-ink-500">
-              Кадровые показатели не детализируются по продукту — фильтр продукта игнорируется.
-            </p>
-          )}
-        </Card>
-      )}
     </div>
   );
 }

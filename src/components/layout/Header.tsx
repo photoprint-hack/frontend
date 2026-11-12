@@ -59,7 +59,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
             {titleFor(location.pathname)}
           </h1>
           <p className="hidden truncate text-[0.6875rem] text-ink-400 sm:block">
-            {subtitle} · ООО «Фотопринт»
+            {subtitle} · Компас
           </p>
         </div>
 

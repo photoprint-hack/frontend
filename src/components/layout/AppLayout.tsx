@@ -79,7 +79,7 @@ export function AppLayout() {
           </div>
         </main>
         <footer className="border-t border-ink-800/70 px-4 py-3 text-[0.6875rem] text-ink-500">
-          ООО «Фотопринт» · Единая система управления компанией · Демонстрационные данные
+          Компас · Управление компанией · ООО «Фотопринт» · Демонстрационные данные
         </footer>
       </div>
     </div>
