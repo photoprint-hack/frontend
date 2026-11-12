@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, CheckCircle2, Database, Download, RefreshCw, Scale, ServerCog } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Database, RefreshCw, Scale, ServerCog } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { GlobalFilters } from '@/components/filters/GlobalFilters';
@@ -24,8 +24,8 @@ const SOURCE_STATUS: Record<DataSource['status'], { label: string; tone: 'ok' | 
   not_loaded: { label: 'Не загружен', tone: 'idle' },
 };
 
-const SEVERITY_TONE = { low: 'idle', medium: 'info', high: 'warn', critical: 'bad' } as const;
-const SEVERITY_LABEL = { low: 'Низкая', medium: 'Средняя', high: 'Высокая', critical: 'Критическая' } as const;
+const SEVERITY_TONE = { warning: 'warn', low: 'idle', medium: 'info', high: 'warn', critical: 'bad' } as const;
+const SEVERITY_LABEL = { warning: 'Предупреждение', low: 'Низкая', medium: 'Средняя', high: 'Высокая', critical: 'Критическая' } as const;
 
 export function DataQualityPage() {
   const { queryParams } = useFilters();
@@ -59,20 +59,11 @@ export function DataQualityPage() {
       toast.success(
         `Проверка выполнена: ${response.data.checks_run} проверок, открыто ${response.data.issues_opened}, закрыто ${response.data.issues_resolved}`,
       );
-      void queryClient.invalidateQueries({ queryKey: ['dq-'] });
+      void queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).startsWith('dq-') });
     },
     onError: (error) => toast.error(toApiError(error).message),
   });
 
-  const importSource = useMutation({
-    mutationFn: async (code: string) => dataQualityApi.importSource(code),
-    onSuccess: () => {
-      toast.success('Импорт источника выполнен');
-      void queryClient.invalidateQueries({ queryKey: ['dq-'] });
-      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-    },
-    onError: (error) => toast.error(toApiError(error).message),
-  });
 
   const error = overview.error ? toApiError(overview.error) : sources.error ? toApiError(sources.error) : null;
   const data = overview.data;
@@ -158,7 +149,6 @@ export function DataQualityPage() {
                   <th className="text-right">Пропущено</th>
                   <th className="text-right">Дубликаты</th>
                   <th className="text-right">Ошибки</th>
-                  {can('integrations.import') && <th className="text-right">Импорт</th>}
                 </tr>
               </thead>
               <tbody>
@@ -193,19 +183,6 @@ export function DataQualityPage() {
                         {formatNumber(source.error_count)}
                       </span>
                     </td>
-                    {can('integrations.import') && (
-                      <td className="text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          icon={<Download className="h-3 w-3" />}
-                          loading={importSource.isPending && importSource.variables === source.code}
-                          onClick={() => importSource.mutate(source.code)}
-                        >
-                          Импорт
-                        </Button>
-                      </td>
-                    )}
                   </tr>
                 ))}
               </tbody>

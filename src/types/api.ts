@@ -493,7 +493,7 @@ export interface DataQualityIssue {
   id: string;
   source: string;
   check_type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: 'warning' | 'low' | 'medium' | 'high' | 'critical';
   description: string;
   affected_records: number;
   status: 'open' | 'resolved';
@@ -557,11 +557,6 @@ export interface LoginResponse {
   token_type: 'bearer';
   expires_in: number;
   user: AuthUser;
-}
-
-export interface MetabaseEmbed {
-  embed_url: string;
-  expires_at: string;
 }
 
 export interface ListParams {

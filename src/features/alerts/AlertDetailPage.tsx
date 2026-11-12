@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, BellRing, CheckCircle2, Eye, Gauge, Lightbulb, ListChecks, ShieldCheck } from 'lucide-react';
@@ -6,6 +7,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { FieldShell, Textarea } from '@/components/ui/Field';
 import { ErrorState, LoadingState } from '@/components/feedback/States';
 import { alertsApi } from '@/lib/api/endpoints';
 import { toApiError } from '@/lib/api/client';
@@ -28,6 +30,8 @@ export function AlertDetailPage() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { can } = useAuth();
+  const [closeOpen, setCloseOpen] = useState(false);
+  const [closeComment, setCloseComment] = useState('');
 
   const query = useQuery({
     queryKey: ['alert', id],
@@ -42,8 +46,10 @@ export function AlertDetailPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: async (status: AlertStatus) => alertsApi.updateStatus(id as string, status),
+    mutationFn: async (status: AlertStatus) => alertsApi.updateStatus(id as string, status, status === 'resolved' ? closeComment.trim() || undefined : undefined),
     onSuccess: (response) => {
+      setCloseOpen(false);
+      setCloseComment('');
       toast.success(`Статус изменён: ${ALERT_STATUS_LABELS[response.data.status]}`);
       void queryClient.invalidateQueries({ queryKey: ['alert', id] });
       void queryClient.invalidateQueries({ queryKey: ['alert-history', id] });
@@ -103,7 +109,7 @@ export function AlertDetailPage() {
                 size="sm"
                 loading={mutation.isPending}
                 icon={<CheckCircle2 className="h-3.5 w-3.5" />}
-                onClick={() => mutation.mutate('resolved')}
+                onClick={() => alert.status === 'active' ? setCloseOpen(true) : mutation.mutate('resolved')}
               >
                 Отметить устранённым
               </Button>
@@ -111,6 +117,13 @@ export function AlertDetailPage() {
           </>
         }
       />
+
+      {closeOpen && <Card>
+        <FieldShell label="Комментарий об устранении отклонения" htmlFor="alert-close-comment" required>
+          <Textarea id="alert-close-comment" rows={3} maxLength={5000} value={closeComment} onChange={(event) => setCloseComment(event.target.value)} />
+        </FieldShell>
+        <div className="mt-3 flex gap-2"><Button variant="primary" size="sm" disabled={!closeComment.trim()} loading={mutation.isPending} onClick={() => mutation.mutate('resolved')}>Подтвердить закрытие</Button><Button variant="ghost" size="sm" disabled={mutation.isPending} onClick={() => setCloseOpen(false)}>Отмена</Button></div>
+      </Card>}
 
       <div className="grid gap-3 lg:grid-cols-3">
         <Card className="lg:col-span-2">

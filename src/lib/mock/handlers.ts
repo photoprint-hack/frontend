@@ -2227,16 +2227,7 @@ export function patchUser(
 
 /* ------------------------------------------------------------- analytics */
 
-export function metabaseEmbed(ctx: MockContext): { embed_url: string; expires_at: string } {
-  const user = ctx.store.users.find((item) => item.id === ctx.userId);
-  if (!user || user.role === 'employee') {
-    throw new MockHttpError(403, 'AUTH_FORBIDDEN', 'BI-аналитика недоступна для роли «Сотрудник»');
-  }
-  return {
-    embed_url: 'about:blank#metabase-demo',
-    expires_at: toIso(new Date(Date.now() + 5 * 60_000)),
-  };
-}
+
 
 /* -------------------------------------------------------------- auth mock */
 

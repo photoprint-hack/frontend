@@ -109,7 +109,7 @@ export function TaskDetailPage() {
     mutationFn: async (payload: { values?: FormValues; status?: TaskStatus; comment?: string }) => {
       if (!task) throw new Error('Задача не загружена');
       const values = payload.values ?? getValues();
-      return tasksApi.update(task.id, {
+      return tasksApi.update(task.id, role === 'employee' ? { version: task.version, ...(payload.status ? { status: payload.status } : {}) } : {
         version: task.version,
         title: values.title,
         description: values.description ?? '',
@@ -162,7 +162,8 @@ export function TaskDetailPage() {
 
   const isTerminal = task.status === 'completed' || task.status === 'cancelled';
   const isAssignee = user?.id === task.assignee_id;
-  const canEdit = !isTerminal && (can('tasks.write') || isAssignee);
+  const canChangeStatus = !isTerminal && (can('tasks.write') || isAssignee);
+  const canEdit = !isTerminal && can('tasks.write');
   const canCancel = !isTerminal && ['admin', 'director', 'manager'].includes(role ?? '');
   const next = NEXT_STATUS[task.status];
 
@@ -196,7 +197,7 @@ export function TaskDetailPage() {
                 решение
               </Link>
             )}
-            {task.alert_id && (
+            {task.alert_id && can('analytics.view') && (
               <Link to={`/alerts/${task.alert_id}`} className="link-quiet text-[0.6875rem]">
                 отклонение
               </Link>
@@ -236,7 +237,7 @@ export function TaskDetailPage() {
                 {cancelMode ? 'Отменить отмену' : 'Отменить задачу'}
               </Button>
             )}
-            {canEdit && next && (
+            {canChangeStatus && next && (
               <Button
                 variant="primary"
                 size="sm"

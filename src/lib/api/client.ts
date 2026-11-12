@@ -4,7 +4,7 @@ import { tokenStore } from '@/lib/auth/token-store';
 import { handleMockRequest, mockSessionUserId, type MockRequest } from '@/lib/mock/router';
 import { MockHttpError } from '@/lib/mock/handlers';
 
-export const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? '';
+export const API_BASE_URL = ((import.meta.env.VITE_API_URL as string | undefined) ?? 'https://backend-v8pa.onrender.com/api/v1').trim().replace(/\/+$/, '');
 
 const mockFlag = String(import.meta.env.VITE_USE_MOCKS ?? '').toLowerCase();
 export const USE_MOCKS = mockFlag === 'true' || mockFlag === '1' || API_BASE_URL === '';
@@ -91,7 +91,7 @@ async function refreshAccessToken(): Promise<string | null> {
         const response = await axios.post(
           `${API_BASE_URL}/auth/refresh`,
           {},
-          { withCredentials: true, headers: { 'Content-Type': 'application/json' } },
+          { withCredentials: true, timeout: 20_000, headers: { 'Content-Type': 'application/json' } },
         );
         const token = (response.data as { data: { access_token: string } }).data.access_token;
         tokenStore.set(token);
@@ -113,6 +113,7 @@ const client: AxiosInstance = axios.create({
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
   timeout: 20_000,
+  paramsSerializer: { indexes: null },
 });
 
 client.interceptors.request.use((config) => {
@@ -128,7 +129,7 @@ client.interceptors.response.use(
   async (error: AxiosError) => {
     const original = error.config as (AxiosRequestConfig & { _retried?: boolean }) | undefined;
     const status = error.response?.status;
-    const isAuthEndpoint = original?.url?.includes('/auth/');
+    const isAuthEndpoint = original?.url === '/auth/login' || original?.url === '/auth/refresh';
 
     if (status === 401 && original && !original._retried && !isAuthEndpoint) {
       original._retried = true;
@@ -139,10 +140,12 @@ client.interceptors.response.use(
       }
       tokenStore.clear();
       onUnauthorized?.();
+      return Promise.reject(toApiError(error));
     }
 
-    if (status === 403 && !isAuthEndpoint) {
-      // 403 не разлогинивает: пользователь остаётся в системе с ограниченными правами.
+    if (status === 401 && original?._retried && !isAuthEndpoint) {
+      tokenStore.clear();
+      onUnauthorized?.();
     }
 
     return Promise.reject(toApiError(error));
@@ -185,6 +188,7 @@ export interface RequestOptions {
   body?: unknown;
   signal?: AbortSignal;
   headers?: Record<string, string>;
+  timeout?: number;
 }
 
 export const http = {
@@ -199,6 +203,7 @@ export const http = {
       params: options.params,
       signal: options.signal,
       headers: options.headers,
+      timeout: options.timeout,
     });
     return response.data;
   },
@@ -208,6 +213,7 @@ export const http = {
       params: options.params,
       signal: options.signal,
       headers: options.headers,
+      timeout: options.timeout,
     });
     return response.data;
   },
@@ -223,7 +229,11 @@ export function createIdempotencyKey(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
 export default client;

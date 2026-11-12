@@ -76,7 +76,7 @@ export function DecisionDetailPage() {
   const history = useQuery({
     queryKey: ['decision-history', id],
     queryFn: async () => decisionsApi.history(id as string, { page_size: 30 }),
-    enabled: Boolean(id),
+    enabled: Boolean(id) && user?.role !== 'employee',
   });
 
   const tasks = useQuery({
@@ -88,6 +88,7 @@ export function DecisionDetailPage() {
   const assigneesQuery = useQuery({
     queryKey: ['assignees'],
     queryFn: async () => usersApi.list({ page_size: 100 }),
+    enabled: can('assignees.read'),
   });
 
   const assignees = useMemo(
@@ -211,7 +212,7 @@ export function DecisionDetailPage() {
             <Badge tone={PRIORITY_TONES[decision.priority]}>{PRIORITY_LABELS[decision.priority]}</Badge>
             <Badge tone="info">версия {decision.version}</Badge>
             <Badge tone="idle">{formatDaysLeft(decision.deadline)}</Badge>
-            {decision.alert_id && (
+            {decision.alert_id && can('analytics.view') && (
               <Link to={`/alerts/${decision.alert_id}`} className="link-quiet text-[0.6875rem]">
                 исходное отклонение
               </Link>

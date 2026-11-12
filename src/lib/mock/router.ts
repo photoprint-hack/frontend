@@ -206,9 +206,6 @@ export async function handleMockRequest(request: MockRequest): Promise<MockRespo
     return { status: 200, data: envelope(handlers.patchUser(segments[1]!, body as never, ctx)) };
   }
 
-  if (path === '/analytics/metabase-embed') {
-    return { status: 200, data: envelope(handlers.metabaseEmbed(ctx)) };
-  }
 
   if (path === '/support/interactions') return { status: 200, data: handlers.supportTickets(params, ctx) };
   if (path === '/support/stats') return { status: 200, data: envelope(handlers.supportStats(ctx)) };

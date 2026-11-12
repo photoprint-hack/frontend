@@ -17,7 +17,6 @@ export type Capability =
   | 'users.manage'
   | 'assignees.read'
   | 'audit.read'
-  | 'integrations.import'
   | 'metrics.recalculate'
   | 'dataQuality.view'
   | 'dataQuality.run'
@@ -43,7 +42,6 @@ const MATRIX: Record<Capability, Role[]> = {
   'users.manage': ['admin'],
   'assignees.read': STAFF,
   'audit.read': ['admin', 'director'],
-  'integrations.import': ['admin'],
   'metrics.recalculate': ['admin'],
   'dataQuality.view': ['admin', 'analyst', 'director'],
   'dataQuality.run': ['admin', 'analyst'],

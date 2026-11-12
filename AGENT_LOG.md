@@ -165,3 +165,83 @@ npm run dev           # ручной прогон сценария из README
 - Ширина контента: `max-w-[1680px]` по центру в `AppLayout` (иначе на 2K-мониторах строки растягиваются нечитаемо), сайдбар `w-64` вместо `264px`.
 - Сетка KPI на дашборде: `sm:grid-cols-2 xl:grid-cols-3 min-[2100px]:grid-cols-4`. На 4 колонки карточки не влезали при 18px базе — название и значение обрезались. Название KPI теперь `line-clamp-2` вместо `truncate`, значение вынесено из сжатой колонки, чтобы не резалось.
 - `npm run build` и `npx tsc --noEmit` после изменений — успешно.
+
+
+## 10. Подвязка текущего Backend — 2026-11-12 (не завершена)
+
+Пользователь разрешил только подключение эндпоинтов, запретив изменения UI/UX.
+Существующий комментарий `// backend wiring` в endpoints.ts сохранён.
+Изменены только API-клиент, endpoint-обёртки, адаптер карты, helper пагинации,
+тип AI-ответа, тестовая команда и документация. Компоненты и стили не изменены.
+
+Исправлены справочники/история KPI, карта/AI и auth retry. Подробности и
+неподключённые части — в начале BACKEND_INTEGRATION.md. `npm run test:api`:
+10 passed; `npm run build`: успешно, предупреждение о размере chunk.
+Серверные изменения, миграции, seed, удалённые запросы, коммит, push и
+Computer Use не выполнялись. Реальное окружение не переключено.
+
+Активных записей в файлы нет; работа ожидает ответы пользователя про целевые
+URL, дедлайны, импорт, Metabase и допустимость дополнений Backend.
+
+
+## 11. Подвязка API и серверные mock-источники — 2026-11-12
+
+Пользователь подтвердил Render API и Vercel origin; разрешил заменить Metabase
+графиками, исключил frontend-импорт, задал deadline до конца дня Минска,
+разрешил дополнить Backend имеющимися данными и добавить комментарий закрытия Alert.
+Прежний запрет UI/UX сохранён для остальных разделов; исправлены только привязки прав.
+
+Выполнены адаптеры Customer/Task/Decision/Dashboard/Production/Impact,
+справочники и пагинация, фильтры, auth retry, дата/время, employee status-only,
+role-aware запросы и обновление качества после check. Metabase удалён из UI/API/mock.
+Аналитика использует API history/sales/production, содержит доступную таблицу динамики,
+сохраняет нули и разрывы null. Проверен react-best-practices checklist: хуки верхнего
+уровня, полные query keys, enabled для зависимых запросов, отдельные состояния ошибок,
+без новых UI-библиотек, стили существующей темы. Браузерная проверка не проводилась.
+
+15 frontend тестов прошли; build/TypeScript успешно, предупреждение о размере chunk.
+Backend: 131 passed на временной PostgreSQL. Серверные mock-источники — отдельный
+admin-only read API, обычные экраны их не используют. Детали в BACKEND_INTEGRATION.md.
+
+Live Render: /openapi.json HTTP 200, дополнения ещё не выложены; CORS для Vercel
+origin возвращал 400 Disallowed CORS origin. Нужно выставить FRONTEND_URL и cookie
+настройки и выложить обе части. Нет коммита/push/deploy, изменений удалённой БД,
+секретов или Computer Use. Все прежние изменения сохранены.
+
+
+Последующая live-проверка: пользователь изменил FRONTEND_URL в Render Environment,
+дождался деплоя. Preflight для Vercel origin теперь HTTP 200 с точным Allow-Origin
+и allow-credentials:true, для localhost — 400. Ошибка CORS из записи выше устранена
+настройкой окружения; выкладка наших локальных изменений кода ещё не выполнена.
+
+
+## 12. Демонстрационные аккаунты с Backend — 2026-11-12
+
+По прямому запросу пользователя блок аккаунтов LoginPage теперь виден и с API.
+Кнопки выбирают @fotoprint.demo для Backend, @photoprint.by для frontend-моков.
+Для API пароль вводится в обычную форму, приватные seed-пароли не публикуются.
+Пользователь подтвердил использование того же /auth/login без отдельного endpoint.
+Layout/стили блока сохранены. npm run build успешен, прежнее предупреждение chunk.
+
+
+Checkpoint follow-up: configured DB was empty; at explicit user request the exact
+seed dataset was batch-loaded and committed. Verified 500 orders, 200 customers,
+500 CRM deals, 300 support records and all five active seed logins/password hashes.
+Live Render director /auth/login, /orders (total=500), /auth/refresh and /auth/logout
+all returned 200. No bypass endpoint was added. Chooser source change remains local;
+frontend publication is still needed. Private passwords were never bundled or printed.
+
+
+## 13. Пароли в кнопках демоаккаунтов — 2026-11-12
+
+Пользователь явно разрешил сделать текущие пять DEMO_* паролей публичными и
+после первоначального автоматического отказа включил full access для продолжения.
+Дополнительная read-only проверка: всего 6 аккаунтов БД, все синтетические
+@fotoprint.demo; пять выбранных паролей соответствуют активным аккаунтам.
+
+Добавлен src/lib/auth/demo-accounts.ts с разрешёнными публичными демоданными.
+LoginPage подставляет email/password выбранной роли и валидирует оба поля;
+обычная отправка по /auth/login сохранена. Frontend-моки используют прежний пароль.
+Другие секреты не переносились, значения не печатались в вывод или документацию.
+Права/БД не менялись. Сборка и TypeScript прошли; прежнее предупреждение chunk.
+Существующие staged изменения сохранены; новые изменения не коммитились/публиковались.

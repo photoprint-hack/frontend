@@ -11,8 +11,8 @@ import { toApiError, USE_MOCKS } from '@/lib/api/client';
 import { homeRoute } from '@/lib/auth/rbac';
 import { ROLE_LABELS } from '@/constants/labels';
 import { cn } from '@/lib/utils/cn';
-import type { Role } from '@/types/api';
 import { CompassMark } from '@/components/brand/CompassMark';
+import { demoAccounts, MOCK_DEMO_PASSWORD } from '@/lib/auth/demo-accounts';
 
 const schema = z.object({
   email: z.string().min(1, 'Укажите корпоративную почту').email('Некорректный формат почты'),
@@ -21,15 +21,7 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-const DEMO_ACCOUNTS: { role: Role; email: string }[] = [
-  { role: 'director', email: 'director@photoprint.by' },
-  { role: 'manager', email: 'manager@photoprint.by' },
-  { role: 'analyst', email: 'analyst@photoprint.by' },
-  { role: 'employee', email: 'employee@photoprint.by' },
-  { role: 'admin', email: 'admin@photoprint.by' },
-];
-
-const DEMO_PASSWORD = 'Demo12345678';
+const DEMO_ACCOUNTS = demoAccounts(USE_MOCKS);
 
 export function LoginPage() {
   const { login, status, home } = useAuth();
@@ -161,13 +153,12 @@ export function LoginPage() {
             </Button>
           </form>
 
-          {USE_MOCKS && (
-            <details className="mt-4 rounded-lg border border-ink-700/70 bg-ink-850/40 p-3">
+          <details className="mt-4 rounded-lg border border-ink-700/70 bg-ink-850/40 p-3">
               <summary className="cursor-pointer text-[0.6875rem] font-medium text-ink-300 marker:text-ink-500">
                 Демонстрационные аккаунты
               </summary>
               <p className="mt-2 text-[0.6875rem] text-ink-400">
-                Пароль для всех ролей: <span className="font-mono text-accent-300">{DEMO_PASSWORD}</span>
+                {USE_MOCKS ? <>Пароль для всех ролей: <span className="font-mono text-accent-300">{MOCK_DEMO_PASSWORD}</span></> : 'Выберите роль — логин и пароль заполнятся автоматически.'}
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {DEMO_ACCOUNTS.map((account) => (
@@ -176,7 +167,7 @@ export function LoginPage() {
                     type="button"
                     onClick={() => {
                       setValue('email', account.email, { shouldValidate: true });
-                      setValue('password', DEMO_PASSWORD, { shouldValidate: true });
+                      setValue('password', account.password, { shouldValidate: true });
                     }}
                     className={cn(
                       'rounded-md border border-ink-600 bg-ink-800/60 px-2 py-1 text-[0.6875rem] text-ink-200 transition',
@@ -187,8 +178,7 @@ export function LoginPage() {
                   </button>
                 ))}
               </div>
-            </details>
-          )}
+          </details>
         </div>
       </div>
     </div>

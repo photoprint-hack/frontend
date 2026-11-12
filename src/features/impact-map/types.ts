@@ -75,7 +75,8 @@ export interface ImpactAnalysis {
   possible_impacts: ImpactAnalysisItem[];
   recommendations: ImpactAnalysisItem[];
   data_gaps: ImpactAnalysisItem[];
-  suggested_responsible: { id: string; full_name: string } | null;
+  suggested_responsible: string | { id: string; full_name: string } | null;
+  draft_text?: string;
   context: ImpactContext;
   graph_revision: string;
   model: string;
