@@ -150,11 +150,11 @@ function demoGraph(params: URLSearchParams, ctx: MockContext): ImpactGraph {
     edge('source:hr', 'process:production', 'feeds', 'calculated', 'Снимки HR используются для оценки укомплектованности.', 'HR', 'hr:department-snapshots'),
     edge('source:mary', 'event:mary-lead', 'produces', 'verified', 'Событие сгенерировано демонстрационным адаптером.', 'Mary · симуляция', 'mary:synthetic-event'),
     edge('event:mary-lead', 'process:sales', 'feeds', 'verified', 'Симулированная квалификация лида относится к процессу продаж.', 'Mary · симуляция', 'mary:synthetic-event'),
-    edge('process:sales', 'department:sales', 'belongs_to', 'verified', 'Процесс закреплён за подразделением продаж.', 'Конфигурация процессов', 'config:sales-owner'),
-    edge('process:production', 'department:production', 'belongs_to', 'verified', 'Производственный процесс закреплён за подразделением.', 'Конфигурация процессов', 'config:production-owner'),
-    edge('process:quality', 'department:production', 'belongs_to', 'verified', 'Контроль качества выполняется производством.', 'Конфигурация процессов', 'config:quality-owner'),
-    edge('process:delivery', 'department:production', 'belongs_to', 'verified', 'Подготовка заказа к доставке связана с выпуском.', 'Конфигурация процессов', 'config:delivery-owner'),
-    edge('process:support', 'department:support', 'belongs_to', 'verified', 'Обращения клиентов обрабатывает поддержка.', 'Конфигурация процессов', 'config:support-owner'),
+    edge('process:sales', `department:${departments.find((item) => item.code === 'sales')?.id}`, 'belongs_to', 'verified', 'Процесс закреплён за подразделением продаж.', 'Конфигурация процессов', 'config:sales-owner'),
+    edge('process:production', `department:${departments.find((item) => item.code === 'production')?.id}`, 'belongs_to', 'verified', 'Производственный процесс закреплён за подразделением.', 'Конфигурация процессов', 'config:production-owner'),
+    edge('process:quality', `department:${departments.find((item) => item.code === 'production')?.id}`, 'belongs_to', 'verified', 'Контроль качества выполняется производством.', 'Конфигурация процессов', 'config:quality-owner'),
+    edge('process:delivery', `department:${departments.find((item) => item.code === 'production')?.id}`, 'belongs_to', 'verified', 'Подготовка заказа к доставке связана с выпуском.', 'Конфигурация процессов', 'config:delivery-owner'),
+    edge('process:support', `department:${departments.find((item) => item.code === 'support')?.id}`, 'belongs_to', 'verified', 'Обращения клиентов обрабатывает поддержка.', 'Конфигурация процессов', 'config:support-owner'),
     edge('process:sales', 'metric:revenue', 'produces', 'calculated', 'Выручка рассчитывается из данных о продажах и финансовых фактов.', 'Расчёт KPI', 'metric:revenue:formula'),
     edge('process:production', 'metric:on_time_orders', 'produces', 'calculated', 'Срок выполнения рассчитывается по событиям заказа.', 'Расчёт KPI', 'metric:on_time_orders:formula'),
     edge('process:quality', 'metric:defect_rate', 'produces', 'calculated', 'Доля брака рассчитывается по записям производства.', 'Расчёт KPI', 'metric:defect_rate:formula'),
@@ -272,7 +272,43 @@ export function getImpactNeighbors(id: string, params: URLSearchParams, ctx: Moc
     }
   }
   const ids = new Set(distance.keys());
-  return { ...graph, nodes: graph.nodes.filter((node) => ids.has(node.id)), edges: adjacencyEdges.filter((item) => ids.has(item.source) && ids.has(item.target)) };
+  const nodes = graph.nodes.filter((node) => ids.has(node.id));
+  const edges = adjacencyEdges.filter((item) => ids.has(item.source) && ids.has(item.target));
+  return layoutFocusedGraph({ ...graph, nodes, edges }, id, depth);
+}
+
+function layoutFocusedGraph(graph: ImpactGraph, rootId: string, maxDepth: number): ImpactGraph {
+  const upstream = new Map<string, number>();
+  const downstream = new Map<string, number>();
+  const walk = (distances: Map<string, number>, forward: boolean) => {
+    distances.set(rootId, 0);
+    const queue = [rootId];
+    while (queue.length) {
+      const current = queue.shift()!;
+      const distance = distances.get(current)!;
+      if (distance >= maxDepth) continue;
+      for (const edge of graph.edges) {
+        const next = forward ? (edge.source === current ? edge.target : null) : (edge.target === current ? edge.source : null);
+        if (next && !distances.has(next)) { distances.set(next, distance + 1); queue.push(next); }
+      }
+    }
+  };
+  walk(upstream, false);
+  walk(downstream, true);
+  const rows = new Map<string, number>();
+  const nodes = graph.nodes.map((node) => {
+    if (node.id === rootId) return { ...node, position: { x: 800, y: 460 } };
+    const up = upstream.get(node.id);
+    const down = downstream.get(node.id);
+    const direction = up !== undefined && down === undefined ? 'up' : down !== undefined && up === undefined ? 'down' : up !== undefined ? 'up' : 'other';
+    const distance = direction === 'up' ? up! : direction === 'down' ? down! : 1;
+    const key = `${direction}:${distance}`;
+    const row = rows.get(key) ?? 0;
+    rows.set(key, row + 1);
+    const x = direction === 'other' ? node.position?.x ?? 1450 : 800 + (direction === 'up' ? -1 : 1) * distance * 235;
+    return { ...node, position: { x, y: direction === 'other' ? node.position?.y ?? 820 : 460 + (row - Math.max(0, (graph.nodes.length / 2) - 1)) * 120 } };
+  });
+  return { ...graph, nodes };
 }
 
 export function findImpactPath(params: URLSearchParams, ctx: MockContext): ImpactPath {

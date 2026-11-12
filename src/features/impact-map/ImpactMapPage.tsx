@@ -147,7 +147,7 @@ function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge 
             return <g key={edge.id} data-map-edge="true" opacity={dimmed ? 0.12 : 1} onClick={(event) => { event.stopPropagation(); onEdge(edge); }} className="cursor-pointer transition-opacity">
               <path d={relationPath(source, target)} fill="none" stroke="transparent" strokeWidth="18" />
               <path d={relationPath(source, target)} fill="none" stroke={onPath ? '#8db0ff' : relationColor} strokeWidth={active ? 4.5 : 1.7} strokeOpacity={active ? 1 : 0.58} strokeDasharray={edge.evidence_type === 'hypothesis' ? '7 6' : edge.evidence_type === 'correlated' ? '3 5' : undefined} markerEnd={`url(#arrow-${edge.evidence_type})`} filter={active ? 'url(#map-glow)' : undefined} />
-              {active && <text fontSize="11" fontWeight="700" paintOrder="stroke" stroke="#080d16" strokeWidth="4" fill="#e5edff" textAnchor="middle" x={(source.position.x + target.position.x) / 2} y={(source.position.y + target.position.y) / 2 - 9}>{RELATION_LABEL[edge.type]}</text>}
+              {(selectedEdge === edge.id || onPath) && <text fontSize="11" fontWeight="700" paintOrder="stroke" stroke="#080d16" strokeWidth="4" fill="#e5edff" textAnchor="middle" x={(source.position.x + target.position.x) / 2} y={(source.position.y + target.position.y) / 2 - 9}>{RELATION_LABEL[edge.type]}</text>}
             </g>;
           })}
           {graph.nodes.map((node) => {
