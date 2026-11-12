@@ -280,6 +280,7 @@ export function getImpactNeighbors(id: string, params: URLSearchParams, ctx: Moc
 function layoutFocusedGraph(graph: ImpactGraph, rootId: string, maxDepth: number): ImpactGraph {
   const upstream = new Map<string, number>();
   const downstream = new Map<string, number>();
+  const connected = new Map<string, number>();
   const walk = (distances: Map<string, number>, forward: boolean) => {
     distances.set(rootId, 0);
     const queue = [rootId];
@@ -295,19 +296,39 @@ function layoutFocusedGraph(graph: ImpactGraph, rootId: string, maxDepth: number
   };
   walk(upstream, false);
   walk(downstream, true);
-  const rows = new Map<string, number>();
-  const nodes = graph.nodes.map((node) => {
-    if (node.id === rootId) return { ...node, position: { x: 800, y: 460 } };
+  const queue = [rootId];
+  connected.set(rootId, 0);
+  while (queue.length) {
+    const current = queue.shift()!;
+    const distance = connected.get(current)!;
+    if (distance >= maxDepth) continue;
+    for (const edge of graph.edges) {
+      const next = edge.source === current ? edge.target : edge.target === current ? edge.source : null;
+      if (next && !connected.has(next)) { connected.set(next, distance + 1); queue.push(next); }
+    }
+  }
+  const xForNode = (node: ImpactNode) => {
+    if (node.id === rootId) return 800;
     const up = upstream.get(node.id);
     const down = downstream.get(node.id);
-    const direction = up !== undefined && down === undefined ? 'up' : down !== undefined && up === undefined ? 'down' : up !== undefined ? 'up' : 'other';
-    const distance = direction === 'up' ? up! : direction === 'down' ? down! : 1;
-    const key = `${direction}:${distance}`;
-    const row = rows.get(key) ?? 0;
-    rows.set(key, row + 1);
-    const x = direction === 'other' ? node.position?.x ?? 1450 : 800 + (direction === 'up' ? -1 : 1) * distance * 235;
-    return { ...node, position: { x, y: direction === 'other' ? node.position?.y ?? 820 : 460 + (row - Math.max(0, (graph.nodes.length / 2) - 1)) * 120 } };
+    const distance = up !== undefined ? up : down !== undefined ? down : connected.get(node.id) ?? 1;
+    const side = up !== undefined ? -1 : down !== undefined ? 1 : connected.get(node.id) !== undefined ? -1 : 1;
+    return 800 + side * distance * 235;
+  };
+  const nodesByLane = new Map<number, ImpactNode[]>();
+  graph.nodes.forEach((node) => {
+    const x = xForNode(node);
+    const lane = nodesByLane.get(x) ?? [];
+    lane.push(node);
+    nodesByLane.set(x, lane);
   });
+  const positions = new Map<string, { x: number; y: number }>();
+  nodesByLane.forEach((lane, x) => {
+    const ordered = lane.filter((node) => node.id !== rootId).sort((a, b) => a.type.localeCompare(b.type) || a.label.localeCompare(b.label));
+    ordered.forEach((node, index) => positions.set(node.id, { x, y: 460 + (index - (ordered.length - 1) / 2) * 145 }));
+  });
+  positions.set(rootId, { x: 800, y: 460 });
+  const nodes = graph.nodes.map((node) => ({ ...node, position: positions.get(node.id) ?? { x: 800, y: 460 } }));
   return { ...graph, nodes };
 }
 
