@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Filter, TrendingUp, Users } from 'lucide-react';
+import { ArrowDown, ArrowRight, Filter, TrendingUp, Users } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { GlobalFilters } from '@/components/filters/GlobalFilters';
 import { useFilters } from '@/components/filters/FiltersContext';
@@ -44,6 +44,7 @@ export function SalesPage() {
 
   const error = summary.error ? toApiError(summary.error) : null;
   const data = summary.data;
+  const funnelStages = funnel.data?.stages ?? [];
 
   return (
     <div className="space-y-4">
@@ -117,35 +118,35 @@ export function SalesPage() {
                 />
               )}
               {funnel.data && (
-                <div className="space-y-2">
-                  {funnel.data.stages.map((stage, index) => {
-                    const max = funnel.data?.stages[0]?.count ?? 1;
-                    const width = max > 0 ? Math.max(6, (stage.count / max) * 100) : 6;
+                <div className="space-y-1" role="group" aria-label="Воронка сделок по этапам">
+                  {funnelStages.map((stage, index) => {
+                    const max = funnelStages[0]?.count ?? 0;
+                    const width = max > 0 ? Math.max(28, (stage.count / max) * 100) : 28;
+                    const stageColor = index === funnelStages.length - 1
+                      ? 'from-signal-ok/90 to-signal-ok/65'
+                      : index === 0
+                        ? 'from-accent-500/85 to-accent-500/55'
+                        : 'from-accent-400/90 to-accent-500/65';
                     return (
-                      <div key={stage.code} className="space-y-1">
-                        <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
-                          <span className="text-ink-200">
-                            <span className="mr-1.5 text-ink-500">{index + 1}.</span>
-                            {stage.name}
+                      <div key={stage.code} className="flex flex-col items-center">
+                        <div className="mb-1 flex w-full items-center justify-between gap-2 px-1 text-[0.6875rem]">
+                          <span className="min-w-0 truncate text-ink-200">
+                            <span className="mr-1.5 text-ink-500">{index + 1}.</span>{stage.name}
                           </span>
-                          <span className="flex items-center gap-2 text-ink-400">
-                            <span className="font-medium text-ink-100">{formatNumber(stage.count)}</span>
-                            <span className="text-[0.625rem]">
-                              {stage.conversion_from_previous_percent === null
-                                ? '—'
-                                : formatPercent(stage.conversion_from_previous_percent)}
-                            </span>
-                          </span>
+                          <span className="shrink-0 font-semibold tabular-nums text-ink-50">{formatNumber(stage.count)}</span>
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-ink-700/60">
-                          <div
-                            className={cn(
-                              'h-full rounded-full',
-                              index === 3 ? 'bg-signal-ok' : index === 2 ? 'bg-accent-400' : 'bg-accent-500/70',
-                            )}
-                            style={{ width: `${width}%` }}
-                          />
+                        <div
+                          className={cn('flex h-10 items-center justify-center bg-gradient-to-r text-[0.6875rem] font-medium text-white shadow-sm transition-[width] duration-300', stageColor)}
+                          style={{ width: `${width}%`, clipPath: 'polygon(7% 0, 93% 0, 83% 100%, 17% 100%)' }}
+                          title={`${stage.name}: ${formatNumber(stage.count)} сделок${stage.conversion_from_previous_percent === null ? '' : ` · ${formatPercent(stage.conversion_from_previous_percent)} от предыдущего этапа`}`}
+                        >
+                          {stage.conversion_from_previous_percent === null
+                            ? 'Старт'
+                            : formatPercent(stage.conversion_from_previous_percent)}
                         </div>
+                        {index < funnelStages.length - 1 && (
+                          <ArrowDown className="my-0.5 h-3.5 w-3.5 text-ink-500" aria-hidden />
+                        )}
                       </div>
                     );
                   })}

@@ -353,7 +353,10 @@ export function DashboardPage() {
             </div>
           </section>
 
-          <div className="grid gap-3 xl:grid-cols-3">
+          <section aria-labelledby="operations-summary-title" className="space-y-2">
+            <h2 id="operations-summary-title" className="text-sm font-semibold tracking-tight text-ink-50">Контроль и исполнение</h2>
+            <p className="-mt-1 text-[0.6875rem] text-ink-400">Отклонения, решения и задачи в выбранном контексте</p>
+            <div className="grid gap-3 xl:grid-cols-3">
             <Card className="xl:col-span-1">
               <CardHeader
                 title="Требуют внимания"
@@ -428,6 +431,7 @@ export function DashboardPage() {
               )}
             </Card>
           </div>
+          </section>
 
           {formulasOpen && (
             <div ref={formulasRef}>
