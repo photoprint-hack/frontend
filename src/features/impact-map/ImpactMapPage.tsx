@@ -92,7 +92,8 @@ function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge 
         aria-label="Интерактивная карта связей показателей, процессов и рисков"
         onWheel={(event) => { event.preventDefault(); scaleBy(event.deltaY < 0 ? 0.07 : -0.07); }}
         onPointerDown={(event) => {
-          if (event.target !== event.currentTarget) return;
+          const target = event.target as Element;
+          if (target.closest('[data-map-node="true"], [data-map-edge="true"]')) return;
           setDrag({ pointerId: event.pointerId, x: event.clientX, y: event.clientY });
           event.currentTarget.setPointerCapture(event.pointerId);
         }}
@@ -109,17 +110,20 @@ function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge 
         onPointerCancel={() => setDrag(null)}
       >
         <defs>
+          <filter id="map-glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
           {Object.entries(EVIDENCE_COLOR).map(([evidence, color]) => <marker key={evidence} id={`arrow-${evidence}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 9 5 L 0 9 z" fill={color} /></marker>)}
         </defs>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
           {graph.edges.map((edge) => {
             const source = nodeMap.get(edge.source); const target = nodeMap.get(edge.target);
             if (!source?.position || !target?.position) return null;
-            const active = selectedEdge === edge.id || pathEdgeIds.has(edge.id);
-            return <g key={edge.id} onClick={(event) => { event.stopPropagation(); onEdge(edge); }} className="cursor-pointer">
+            const onPath = pathEdgeIds.has(edge.id);
+            const active = selectedEdge === edge.id || onPath;
+            const dimmed = Boolean(path && !onPath);
+            return <g key={edge.id} data-map-edge="true" opacity={dimmed ? 0.12 : 1} onClick={(event) => { event.stopPropagation(); onEdge(edge); }} className="cursor-pointer transition-opacity">
               <path d={relationPath(source, target)} fill="none" stroke="transparent" strokeWidth="18" />
-              <path d={relationPath(source, target)} fill="none" stroke={EVIDENCE_COLOR[edge.evidence_type]} strokeWidth={active ? 3.5 : 1.7} strokeOpacity={active ? 1 : 0.58} strokeDasharray={edge.evidence_type === 'hypothesis' ? '7 6' : edge.evidence_type === 'correlated' ? '3 5' : undefined} markerEnd={`url(#arrow-${edge.evidence_type})`} />
-              {active && <text fontSize="11" fill="#d9e2f2" textAnchor="middle" x={(source.position.x + target.position.x) / 2} y={(source.position.y + target.position.y) / 2 - 9}>{RELATION_LABEL[edge.type]}</text>}
+              <path d={relationPath(source, target)} fill="none" stroke={onPath ? '#8db0ff' : EVIDENCE_COLOR[edge.evidence_type]} strokeWidth={active ? 4.5 : 1.7} strokeOpacity={active ? 1 : 0.58} strokeDasharray={edge.evidence_type === 'hypothesis' ? '7 6' : edge.evidence_type === 'correlated' ? '3 5' : undefined} markerEnd={`url(#arrow-${edge.evidence_type})`} filter={active ? 'url(#map-glow)' : undefined} />
+              {active && <text fontSize="11" fontWeight="700" paintOrder="stroke" stroke="#080d16" strokeWidth="4" fill="#e5edff" textAnchor="middle" x={(source.position.x + target.position.x) / 2} y={(source.position.y + target.position.y) / 2 - 9}>{RELATION_LABEL[edge.type]}</text>}
             </g>;
           })}
           {graph.nodes.map((node) => {
@@ -127,12 +131,15 @@ function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge 
             if (!position) return null;
             const active = selectedNode === node.id;
             const onPath = pathNodeIds.has(node.id);
+            const dimmed = Boolean(path && !onPath);
             const actual = node.type === 'metric' ? node.context?.actual : null;
             const target = node.type === 'metric' ? node.context?.target : null;
             const unit = node.type === 'metric' ? textValue(node.context?.unit) : '';
             const valueText = actual === null || actual === undefined ? '' : `${formatUnit(typeof actual === 'number' ? actual : null, unit)}${target === null || target === undefined ? '' : ` / ${formatUnit(typeof target === 'number' ? target : null, unit)}`}`;
-            return <g key={node.id} transform={`translate(${position.x - NODE_W / 2},${position.y - NODE_H / 2})`} className="cursor-pointer" onClick={(event) => { event.stopPropagation(); onNode(node); }} role="button" tabIndex={0} aria-label={`${KIND_LABEL[node.type]}: ${node.label}`} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onNode(node); } }}>
-              <rect width={NODE_W} height={NODE_H} rx="13" fill="#111925" stroke={active || onPath ? '#79a0ff' : KIND_COLOR[node.type]} strokeWidth={active ? 2.6 : onPath ? 2 : 1.2} strokeOpacity={active || onPath ? 1 : 0.58} />
+            return <g key={node.id} data-map-node="true" opacity={dimmed ? 0.24 : 1} transform={`translate(${position.x - NODE_W / 2},${position.y - NODE_H / 2})`} className="cursor-pointer transition-opacity" onClick={(event) => { event.stopPropagation(); onNode(node); }} role="button" tabIndex={0} aria-label={`${KIND_LABEL[node.type]}: ${node.label}`} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onNode(node); } }}>
+              {active && <rect x="-7" y="-7" width={NODE_W + 14} height={NODE_H + 14} rx="18" fill="#5790ff" fillOpacity=".15" stroke="#83a9ff" strokeWidth="2" />}
+              {active && <rect x="-7" y="-7" width={NODE_W + 14} height={NODE_H + 14} rx="18" fill="#5790ff" fillOpacity=".15" stroke="#83a9ff" strokeWidth="2" />}
+              <rect width={NODE_W} height={NODE_H} rx="13" fill={active || onPath ? '#182947' : '#111925'} stroke={active || onPath ? '#8fb0ff' : KIND_COLOR[node.type]} strokeWidth={active ? 3.5 : onPath ? 3 : 1.2} strokeOpacity={active || onPath ? 1 : 0.58} filter={active ? 'url(#map-glow)' : undefined} />
               <rect x="1" y="1" width="4" height={NODE_H - 2} rx="2" fill={KIND_COLOR[node.type]} />
               <circle cx="19" cy="20" r="4" fill={KIND_COLOR[node.type]} />
               <text x="30" y="24" fontSize="10" letterSpacing=".5" fill="#9ba8bc">{KIND_LABEL[node.type].toLocaleUpperCase('ru-RU')}</text>
@@ -185,19 +192,19 @@ export function ImpactMapPage() {
   const [toId, setToId] = useState('');
   const [depth, setDepth] = useState(2);
   const [direction, setDirection] = useState<ImpactDirection>('both');
+  const [pathDirection, setPathDirection] = useState<ImpactDirection>('out');
   const [edgeTypes, setEdgeTypes] = useState<ImpactEdgeType[]>(EDGE_TYPES);
-  const [exploration, setExploration] = useState<ImpactGraph | null>(null);
   const [path, setPath] = useState<ImpactPath | null>(null);
   const [analysisError, setAnalysisError] = useState('');
   const map = useQuery({ queryKey: ['impact-map', user?.id, role, queryParams], queryFn: async () => (await impactMapApi.get(queryParams)).data, staleTime: 20_000 });
   const nodeQuery = useQuery({ queryKey: ['impact-map-node', user?.id, selectedNodeId, queryParams], queryFn: async () => selectedNodeId ? (await impactMapApi.node(selectedNodeId, queryParams)).data : null, enabled: Boolean(selectedNodeId), staleTime: 15_000 });
-  const neighbors = useMutation({ mutationFn: async () => { if (!selectedNodeId) throw new Error('Выберите точку исследования'); return (await impactMapApi.neighbors(selectedNodeId, { ...queryParams, depth, direction, edge_types: edgeTypes.join(',') })).data; }, onSuccess: (result) => { setExploration(result); setPath(null); } });
-  const pathSearch = useMutation({ mutationFn: async () => { if (!fromId || !toId || fromId === toId) throw new Error('Выберите две разные точки маршрута'); return (await impactMapApi.path({ ...queryParams, from_node_id: fromId, to_node_id: toId, depth, direction: 'out', edge_types: edgeTypes.join(',') })).data; }, onSuccess: (result) => { setPath(result); setTab('problem'); setSelectedNodeId(result.nodes[0]?.id ?? fromId); } });
+  const neighbors = useQuery({ queryKey: ['impact-map-neighbors', user?.id, selectedNodeId, queryParams, depth, direction, edgeTypes], queryFn: async () => selectedNodeId ? (await impactMapApi.neighbors(selectedNodeId, { ...queryParams, depth, direction, edge_types: edgeTypes.join(',') })).data : null, enabled: Boolean(selectedNodeId), staleTime: 15_000 });
+  const pathSearch = useMutation({ mutationFn: async () => { if (!fromId || !toId || fromId === toId) throw new Error('Выберите две разные точки маршрута'); return (await impactMapApi.path({ ...queryParams, from_node_id: fromId, to_node_id: toId, depth, direction: pathDirection, edge_types: edgeTypes.join(',') })).data; }, onSuccess: (result) => { setPath(result); setTab('problem'); setSelectedNodeId(fromId); } });
   const analyze = useMutation({ mutationFn: async () => { const node = activeGraph?.nodes.find((item) => item.id === selectedNodeId); const code = node?.entity_ref?.code; if (!code) throw new Error('Выберите KPI, чтобы подготовить анализ'); return (await impactMapApi.analyze({ metric_code: code, graph_revision: activeGraph!.graph_revision, context: { ...activeGraph!.context } })).data; }, onSuccess: () => setAnalysisError(''), onError: (error) => setAnalysisError(toApiError(error).message) });
 
-  const activeGraph = exploration ?? map.data;
+  const activeGraph = neighbors.data ?? map.data;
   const filterKey = JSON.stringify(queryParams);
-  useEffect(() => { setExploration(null); setPath(null); setSelectedNodeId(null); setSelectedEdgeId(null); }, [filterKey]);
+  useEffect(() => { setPath(null); setSelectedNodeId(null); setSelectedEdgeId(null); }, [filterKey]);
   useEffect(() => { if (map.data?.nodes.length) { setFromId((current) => map.data!.nodes.some((node) => node.id === current) ? current : map.data!.nodes.find((node) => node.type === 'metric')?.id ?? map.data!.nodes[0]!.id); setToId((current) => map.data!.nodes.some((node) => node.id === current) ? current : map.data!.nodes.find((node) => node.type === 'risk')?.id ?? map.data!.nodes.at(-1)!.id); } }, [map.data]);
 
   const nodes = activeGraph?.nodes ?? [];
@@ -216,7 +223,7 @@ export function ImpactMapPage() {
   if (!map.data || map.data.nodes.length === 0) return <EmptyState title="В этом контексте пока нет связей" description="Попробуйте изменить период или фильтры. Для сотрудника здесь показываются только назначенные ему задачи." icon={<Network className="h-5 w-5" />} />;
 
   return <div className="space-y-5">
-    <PageHeader title="Карта влияния" description="Исследуйте, как источники и процессы связаны с показателями, рисками и действиями. Связь в графе сама по себе не доказывает причину." meta={<><Badge tone={USE_MOCKS ? 'warn' : 'ok'} dot>{USE_MOCKS ? 'Демо-данные' : 'Данные сервера'}</Badge><Badge tone="idle">{map.data.nodes.length} элементов · {map.data.edges.length} связей</Badge><Badge tone="idle">Период: {formatDate(filters.date_from)} — {formatDate(filters.date_to)}</Badge></>} actions={<Button variant="outline" size="sm" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={() => { setExploration(null); setPath(null); setSelectedNodeId(null); void map.refetch(); }}>Общий обзор</Button>} />
+    <PageHeader title="Карта влияния" description="Выберите KPI, чтобы сразу увидеть, что влияет на него и на что влияет он. Связь сама по себе не доказывает причину." meta={<><Badge tone={USE_MOCKS ? 'warn' : 'ok'} dot>{USE_MOCKS ? 'Демо-данные' : 'Данные сервера'}</Badge><Badge tone="idle">{map.data.nodes.length} элементов · {map.data.edges.length} связей</Badge><Badge tone="idle">Период: {formatDate(filters.date_from)} — {formatDate(filters.date_to)}</Badge></>} actions={<Button variant="outline" size="sm" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={() => { setPath(null); setSelectedNodeId(null); void map.refetch(); }}>Общий обзор</Button>} />
     {role !== 'employee' && <GlobalFilters />}
     {role === 'employee' && <div className="rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-xs text-ink-300">Показана только ваша рабочая область: назначенные задачи и прямо связанные записи.</div>}
 
@@ -237,6 +244,7 @@ export function ImpactMapPage() {
         <label className="block"><span className="mb-1.5 block text-xs font-medium text-ink-300">Найти показатель, риск или запись</span><div className="relative"><Search className="absolute left-3 top-2.5 h-4 w-4 text-ink-500" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Например: срок, брак, выручка" className="h-9 w-full rounded-lg border border-ink-700 bg-ink-950 pl-9 pr-3 text-sm text-ink-100 placeholder:text-ink-500 focus:border-accent-400 focus:outline-none" /></div></label>
         <label className="block text-xs text-ink-400">Начать от<select value={fromId} onChange={(event) => setFromId(event.target.value)} className="mt-1.5 h-9 w-full rounded-lg border border-ink-700 bg-ink-950 px-2 text-xs text-ink-100">{nodes.map((node) => <option key={node.id} value={node.id}>{KIND_LABEL[node.type]} · {node.label}</option>)}</select></label>
         <label className="block text-xs text-ink-400">Найти путь до<select value={toId} onChange={(event) => setToId(event.target.value)} className="mt-1.5 h-9 w-full rounded-lg border border-ink-700 bg-ink-950 px-2 text-xs text-ink-100">{nodes.map((node) => <option key={node.id} value={node.id}>{KIND_LABEL[node.type]} · {node.label}</option>)}</select></label>
+        <label className="block text-xs text-ink-400">Направление пути<select value={pathDirection} onChange={(event) => setPathDirection(event.target.value as ImpactDirection)} className="mt-1.5 h-9 w-full rounded-lg border border-ink-700 bg-ink-950 px-2 text-xs text-ink-100"><option value="out">По направлению стрелок</option><option value="in">К источнику</option><option value="both">В обе стороны</option></select></label>
         <Button variant="primary" size="sm" loading={pathSearch.isPending} icon={<GitBranch className="h-4 w-4" />} onClick={() => pathSearch.mutate()}>Найти цепочку</Button>
         {search && <div className="lg:col-span-4"><p className="mb-2 text-[11px] text-ink-500">Совпадения в доступной карте</p>{searchResults.length ? <div className="flex flex-wrap gap-2">{searchResults.map((node) => <button key={node.id} onClick={() => { setSelectedNodeId(node.id); setFromId(node.id); }} className="rounded-lg border border-ink-700 bg-ink-850 px-3 py-2 text-left hover:border-accent-500/60"><span className="block text-[10px] text-ink-500">{KIND_LABEL[node.type]}</span><span className="text-xs font-medium text-ink-100">{node.label}</span></button>)}</div> : <p className="text-xs text-ink-400">В этой области совпадений нет.</p>}</div>}
         {pathSearch.error && <p className="lg:col-span-4 text-xs text-signal-warn">{toApiError(pathSearch.error).message}</p>}
@@ -246,15 +254,19 @@ export function ImpactMapPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-3">
           <Card className="space-y-3 p-3 sm:p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2"><span className="text-xs font-semibold text-ink-200">Обход связей</span><label className="flex items-center gap-1.5 text-[11px] text-ink-400">Глубина<select value={depth} onChange={(event) => setDepth(Number(event.target.value))} className="rounded-md border border-ink-700 bg-ink-950 px-2 py-1 text-ink-100">{[1,2,3].map((value) => <option key={value} value={value}>{value}</option>)}</select></label><label className="flex items-center gap-1.5 text-[11px] text-ink-400">Направление<select value={direction} onChange={(event) => setDirection(event.target.value as ImpactDirection)} className="rounded-md border border-ink-700 bg-ink-950 px-2 py-1 text-ink-100"><option value="both">В обе стороны</option><option value="out">По ходу</option><option value="in">К источнику</option></select></label></div>
-              <Button size="sm" variant="outline" disabled={!selectedNodeId || neighbors.isPending} loading={neighbors.isPending} icon={<GitBranch className="h-3.5 w-3.5" />} onClick={() => neighbors.mutate()}>Показать связи выбранного</Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-xs font-semibold text-ink-200">Показать вокруг выбранного KPI</span>
+              <div className="inline-flex rounded-lg border border-ink-700 bg-ink-950 p-1" aria-label="Направление обхода">
+                {([['both','Все связи'],['in','Что влияет'],['out','На что влияет']] as const).map(([value,label]) => <button key={value} onClick={() => setDirection(value)} aria-pressed={direction === value} className={cn('rounded-md px-2.5 py-1.5 text-[11px] transition', direction === value ? 'bg-accent-500 text-ink-950 font-semibold' : 'text-ink-400 hover:text-ink-100')}>{label}</button>)}
+              </div>
+              <div className="ml-auto inline-flex items-center gap-2 text-[11px] text-ink-400"><span>Связей по цепочке</span><button onClick={() => setDepth((value) => Math.max(1, value - 1))} disabled={depth <= 1} className="h-7 w-7 rounded-md border border-ink-700 disabled:opacity-40" aria-label="Уменьшить глубину">−</button><span className="w-4 text-center font-semibold text-ink-100">{depth}</span><button onClick={() => setDepth((value) => Math.min(3, value + 1))} disabled={depth >= 3} className="h-7 w-7 rounded-md border border-ink-700 disabled:opacity-40" aria-label="Увеличить глубину">+</button></div>
+              <details className="relative"><summary className="cursor-pointer list-none rounded-lg border border-ink-700 px-3 py-2 text-[11px] text-ink-300 hover:bg-ink-850">Типы связей · {edgeTypes.length === EDGE_TYPES.length ? 'Все' : edgeTypes.length}</summary><div className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-ink-700 bg-ink-900 p-3 shadow-xl"><div className="mb-2 flex justify-between text-[11px]"><span className="font-medium text-ink-100">Оставить на карте</span><button className="text-accent-300" onClick={(event) => { event.preventDefault(); setEdgeTypes(edgeTypes.length === EDGE_TYPES.length ? [] : EDGE_TYPES); }}> {edgeTypes.length === EDGE_TYPES.length ? 'Снять все' : 'Выбрать все'}</button></div>{EDGE_TYPES.map((type) => <label key={type} className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-1.5 text-xs text-ink-300 hover:bg-ink-800"><input type="checkbox" checked={edgeTypes.includes(type)} onChange={(event) => setEdgeTypes((current) => event.target.checked ? [...current, type] : current.filter((item) => item !== type))} className="accent-blue-500" />{RELATION_LABEL[type]}</label>)}</div></details>
             </div>
-            <div className="flex flex-wrap gap-x-3 gap-y-1.5 border-t border-ink-800 pt-2.5">{EDGE_TYPES.map((type) => <label key={type} className="inline-flex cursor-pointer items-center gap-1.5 text-[10px] text-ink-400"><input type="checkbox" checked={edgeTypes.includes(type)} onChange={(event) => setEdgeTypes((current) => event.target.checked ? [...current, type] : current.filter((item) => item !== type))} className="accent-blue-500" />{RELATION_LABEL[type]}</label>)}</div>
+            {neighbors.isFetching && <p className="text-[11px] text-ink-500">Обновляю связи в выбранном направлении…</p>}
             {neighbors.error && <p className="text-xs text-signal-warn">Не удалось раскрыть связи: {toApiError(neighbors.error).message}</p>}
           </Card>
-          {exploration && <div className="flex items-center justify-between rounded-lg border border-accent-500/25 bg-accent-500/5 px-3 py-2 text-xs"><span className="text-ink-200">Показана область выбранного элемента · {exploration.nodes.length} элементов</span><button className="text-accent-300 hover:text-accent-200" onClick={() => { setExploration(null); setPath(null); }}>Вернуться к общему обзору</button></div>}
-          <ImpactCanvas graph={activeGraph!} selectedNode={selectedNodeId} selectedEdge={selectedEdgeId} path={path} onNode={(node) => { setSelectedNodeId(node.id); setSelectedEdgeId(null); }} onEdge={(edge) => { setSelectedEdgeId(edge.id); setSelectedNodeId(null); }} />
+          {selectedNode && <p className="rounded-lg border border-accent-500/20 bg-accent-500/5 px-3 py-2 text-xs text-ink-200">Показаны связи для <b>{selectedNode.label}</b>. <button className="ml-1 text-accent-300 hover:text-accent-200" onClick={() => { setSelectedNodeId(null); setPath(null); setSelectedEdgeId(null); }}>Сбросить фокус</button></p>}
+          <ImpactCanvas graph={activeGraph!} selectedNode={selectedNodeId} selectedEdge={selectedEdgeId} path={path} onNode={(node) => { setSelectedNodeId(node.id); setSelectedEdgeId(null); setPath(null); }} onEdge={(edge) => { setSelectedEdgeId(edge.id); setSelectedNodeId(null); setPath(null); }} />
           <div className="flex flex-wrap gap-x-4 gap-y-2 px-1">{(['verified','calculated','correlated','hypothesis'] as EvidenceType[]).map((type) => <EvidenceBadge key={type} type={type} />)}</div>
         </div>
         {selectedEdge ? <Card className="space-y-4"><div className="flex items-center justify-between"><h2 className="text-sm font-semibold text-ink-50">Связь</h2><button className="text-xs text-ink-400 hover:text-ink-100" onClick={() => setSelectedEdgeId(null)}>Закрыть</button></div><p className="text-sm text-ink-100">{RELATION_LABEL[selectedEdge.type]}</p><EvidenceBadge type={selectedEdge.evidence_type} /><p className="text-xs leading-relaxed text-ink-300">{selectedEdge.description}</p><div className="rounded-lg border border-ink-800 bg-ink-850 p-3 text-xs"><p className="text-ink-500">Источник связи</p><p className="mt-1 text-ink-100">{selectedEdge.source_label}</p><p className="mt-2 break-all font-mono text-[10px] text-ink-500">{selectedEdge.evidence_refs.join(', ') || 'Нет подтверждающих ссылок'}</p></div><p className="text-[11px] leading-relaxed text-ink-500">Стрелка показывает направление. У гипотезы штриховая линия; она не является подтверждённой причинностью.</p></Card> : <NodeDetails node={selectedNode} edges={connectedEdges} graph={activeGraph!} onClose={() => setSelectedNodeId(null)} onAnalyze={() => { setTab('analysis'); analyze.mutate(); }} />}
