@@ -74,7 +74,7 @@ export function ProductionPage() {
     <div className="space-y-4">
       <PageHeader
         title="Производство и качество"
-        description="План и факт выпуска, очередь, lead time, загрузка мощностей, простои, брак и перепечатки. Детализация — до заказа и продукта."
+        description="Производственные записи — за выбранный период. Очередь показывает заказы, ожидающие запуска или уже находящиеся в работе; показатели выпуска, загрузки, простоев и качества можно проверить в деталях ниже."
         meta={
           data ? (
             <>
@@ -96,29 +96,35 @@ export function ProductionPage() {
 
       {data && (
         <>
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-4">
-            <Stat
-              label="План выпуска"
-              value={data.planned_quantity === null ? '—' : `${formatNumber(data.planned_quantity)} ед.`}
-            />
-            <Stat
-              label="Факт выпуска"
-              value={data.actual_quantity === null ? '—' : `${formatNumber(data.actual_quantity)} ед.`}
-            />
-            <Stat
-              label="Выполнение плана"
-              value={formatPercent(data.plan_achievement_percent)}
-              tone={
-                data.plan_achievement_percent === null
-                  ? undefined
-                  : data.plan_achievement_percent >= 95
-                    ? 'ok'
-                    : data.plan_achievement_percent >= 85
-                      ? 'warn'
-                      : 'bad'
-              }
-            />
-            <Stat label="Очередь" value={`${formatNumber(data.queue_quantity)} ед.`} hint="Текущие queued/in_progress" />
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3">
+            <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
+              <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">Выпуск за период</p>
+              <div className="mt-2 grid grid-cols-3 divide-x divide-ink-700/70">
+                <div className="pr-2">
+                  <p className="text-[0.625rem] text-ink-400">План</p>
+                  <p className="mt-1 text-sm font-semibold leading-none text-ink-50">{data.planned_quantity === null ? '—' : `${formatNumber(data.planned_quantity)} ед.`}</p>
+                </div>
+                <div className="px-2">
+                  <p className="text-[0.625rem] text-ink-400">Факт</p>
+                  <p className="mt-1 text-sm font-semibold leading-none text-ink-50">{data.actual_quantity === null ? '—' : `${formatNumber(data.actual_quantity)} ед.`}</p>
+                </div>
+                <div className="pl-2">
+                  <p className="text-[0.625rem] text-ink-400">Выполнение</p>
+                  <p className={cn(
+                    'mt-1 text-sm font-semibold leading-none',
+                    data.plan_achievement_percent === null
+                      ? 'text-ink-50'
+                      : data.plan_achievement_percent >= 95
+                        ? 'text-signal-ok'
+                        : data.plan_achievement_percent >= 85
+                          ? 'text-signal-warn'
+                          : 'text-signal-bad',
+                  )}>{formatPercent(data.plan_achievement_percent)}</p>
+                </div>
+              </div>
+              <p className="mt-2 text-[0.625rem] text-ink-500">{formatDate(data.context.date_from)} — {formatDate(data.context.date_to)}</p>
+            </div>
+            <Stat label="Очередь заказов" value={`${formatNumber(data.queue_quantity)} ед.`} hint="Ожидают запуска или в работе" />
             <Stat
               label="Средний lead time"
               value={data.average_lead_time_hours === null ? '—' : `${formatNumber(data.average_lead_time_hours, 1)} ч`}
@@ -183,8 +189,8 @@ export function ProductionPage() {
             <Card className="p-0">
               <div className="p-4 pb-0">
                 <CardHeader
-                  title="Производственные данные"
-                  subtitle="Участок моделируется подразделением: отдельного справочника участков в MVP нет"
+                  title="Производственные данные за период"
+                  subtitle={`${formatDate(data.context.date_from)} — ${formatDate(data.context.date_to)} · очередь ожидающих и выполняемых заказов — во вкладке «Очередь заказов»`}
                   icon={<Printer className="h-4 w-4" />}
                 />
               </div>

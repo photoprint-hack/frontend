@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
   ChevronUp,
   CircleSlash,
   Clock,
@@ -49,6 +50,13 @@ const KPI_TONE = {
   warning: { line: 'bg-signal-warn', text: 'text-signal-warn', soft: 'bg-signal-warn/10' },
   critical: { line: 'bg-signal-bad', text: 'text-signal-bad', soft: 'bg-signal-bad/10' },
   no_data: { line: 'bg-ink-500', text: 'text-ink-400', soft: 'bg-ink-700/50' },
+} as const;
+
+const KPI_BADGE_TONE = {
+  normal: 'ok',
+  warning: 'warn',
+  critical: 'bad',
+  no_data: 'idle',
 } as const;
 
 function KpiTableRow({ kpi }: { kpi: Kpi }) {
@@ -438,7 +446,7 @@ export function DashboardPage() {
               <Card>
                 <CardHeader
                   title="Формулы и источники показателей"
-                  subtitle="Расчёт выполняется на стороне Backend; интерфейс отображает готовые значения"
+                  subtitle={`${data.kpis.length} показателей · раскройте строку, чтобы увидеть формулу и источники данных`}
                   icon={<BarChart3 className="h-4 w-4" />}
                   action={
                     <Button variant="ghost" size="sm" icon={<ChevronUp className="h-3.5 w-3.5" />} onClick={() => setFormulasOpen(false)}>
@@ -446,33 +454,48 @@ export function DashboardPage() {
                     </Button>
                   }
                 />
-                <div className="overflow-x-auto">
-                  <table className="table-shell min-w-[720px]">
-                    <thead>
-                      <tr>
-                        <th>KPI</th>
-                        <th>Факт</th>
-                        <th>План</th>
-                        <th>Формула</th>
-                        <th>Источник</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.kpis.map((kpi) => (
-                        <tr key={kpi.code}>
-                          <td>
-                            <Link to={`/metrics/${kpi.code}`} className="link-quiet text-xs font-medium">
-                              {kpi.name}
-                            </Link>
-                          </td>
-                          <td className="whitespace-nowrap text-xs">{formatUnit(kpi.actual, kpi.unit)}</td>
-                          <td className="whitespace-nowrap text-xs text-ink-300">{formatUnit(kpi.target, kpi.unit)}</td>
-                          <td className="text-[0.6875rem] leading-snug text-ink-400">{kpi.formula}</td>
-                          <td className="whitespace-nowrap text-[0.6875rem] text-ink-400">{kpi.source.join(', ')}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-2">
+                  {data.kpis.map((kpi) => (
+                    <details key={kpi.code} className="group overflow-hidden rounded-xl border border-ink-700/70 bg-ink-850/35 open:border-accent-400/30 open:bg-ink-850/60">
+                      <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-4 gap-y-2 p-3 outline-none transition hover:bg-ink-800/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-400 [&::-webkit-details-marker]:hidden">
+                        <span className="min-w-[180px] flex-1">
+                          <span className="block text-xs font-semibold text-ink-100">{kpi.name}</span>
+                          <span className="mt-0.5 block text-[0.625rem] text-ink-400">{kpi.code}</span>
+                        </span>
+                        <span className="flex items-center gap-3 text-[0.6875rem]">
+                          <span><span className="text-ink-500">Факт </span><span className="font-medium text-ink-100">{formatUnit(kpi.actual, kpi.unit)}</span></span>
+                          <span><span className="text-ink-500">План </span><span className="text-ink-300">{formatUnit(kpi.target, kpi.unit)}</span></span>
+                        </span>
+                        <Badge tone={KPI_BADGE_TONE[kpi.status]} dot>
+                          {METRIC_STATUS_LABELS[kpi.status]}
+                        </Badge>
+                        <ChevronDown className="h-4 w-4 shrink-0 text-ink-400 transition-transform group-open:rotate-180" aria-hidden />
+                      </summary>
+                      <div className="grid gap-3 border-t border-ink-700/60 p-3 sm:grid-cols-2">
+                        <div className="min-w-0">
+                          <p className="text-[0.625rem] font-medium uppercase tracking-wide text-ink-400">Формула расчёта</p>
+                          <p className="mt-1.5 rounded-lg border border-ink-700/60 bg-ink-950/60 px-3 py-2 font-mono text-xs leading-relaxed text-accent-200">
+                            {kpi.formula || 'Формула не указана'}
+                          </p>
+                          {kpi.description && <p className="mt-2 text-[0.6875rem] leading-relaxed text-ink-300">{kpi.description}</p>}
+                        </div>
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-[0.625rem] font-medium uppercase tracking-wide text-ink-400">Источники данных</p>
+                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+                              {kpi.source.length > 0 ? kpi.source.map((source) => (
+                                <span key={source} className="rounded-md border border-ink-700/70 bg-ink-800/60 px-2 py-1 text-[0.625rem] text-ink-200">{source}</span>
+                              )) : <span className="text-xs text-ink-500">Не указаны</span>}
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[0.625rem] text-ink-500">
+                            <span>Версия: {kpi.formula_version || '—'}</span>
+                            <span>Прогноз: {kpi.forecast_method || 'не рассчитывается'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </details>
+                  ))}
                 </div>
               </Card>
             </div>

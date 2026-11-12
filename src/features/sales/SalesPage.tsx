@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowDown, ArrowRight, Filter, TrendingUp, Users } from 'lucide-react';
+import { ArrowDown, ArrowRight, ChevronDown, ChevronUp, Filter, TrendingUp, Users } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { GlobalFilters } from '@/components/filters/GlobalFilters';
 import { useFilters } from '@/components/filters/FiltersContext';
@@ -28,6 +28,7 @@ function Metric({ label, value, hint }: { label: string; value: string; hint?: s
 export function SalesPage() {
   const { queryParams } = useFilters();
   const [dealStage, setDealStage] = useState('');
+  const [dealsOpen, setDealsOpen] = useState(false);
 
   const summary = useQuery({
     queryKey: ['sales-summary', queryParams],
@@ -40,6 +41,7 @@ export function SalesPage() {
   const deals = useQuery({
     queryKey: ['sales-deals', queryParams, dealStage],
     queryFn: async () => salesApi.deals({ ...queryParams, page_size: 10, ...(dealStage ? { stage: dealStage } : {}) }),
+    enabled: dealsOpen,
   });
 
   const error = summary.error ? toApiError(summary.error) : null;
@@ -203,32 +205,47 @@ export function SalesPage() {
           <Card>
             <CardHeader
               title="CRM-сделки"
-              subtitle="Стадии сделок хранятся в источнике CRM; выигранная сделка связана с заказом"
+              subtitle="Откройте реестр, чтобы перейти от сводки к отдельным сделкам, клиентам и связанным заказам"
               icon={<Filter className="h-4 w-4" />}
               action={
-                <select
-                  value={dealStage}
-                  onChange={(event) => setDealStage(event.target.value)}
-                  aria-label="Фильтр по стадии сделки"
-                  className="h-8 rounded-md border border-ink-600 bg-ink-850 px-2 text-xs text-ink-100"
-                >
-                  <option value="">Все стадии</option>
-                  {Object.entries(DEAL_STAGE_LABELS).map(([code, label]) => (
-                    <option key={code} value={code}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  {dealsOpen && (
+                    <select
+                      value={dealStage}
+                      onChange={(event) => setDealStage(event.target.value)}
+                      aria-label="Фильтр по стадии сделки"
+                      className="h-8 rounded-md border border-ink-600 bg-ink-850 px-2 text-xs text-ink-100"
+                    >
+                      <option value="">Все стадии</option>
+                      {Object.entries(DEAL_STAGE_LABELS).map(([code, label]) => (
+                        <option key={code} value={code}>{label}</option>
+                      ))}
+                    </select>
+                  )}
+                  <Button
+                    size="sm"
+                    variant={dealsOpen ? 'secondary' : 'outline'}
+                    icon={dealsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                    aria-expanded={dealsOpen}
+                    onClick={() => setDealsOpen((open) => !open)}
+                  >
+                    {dealsOpen ? 'Скрыть сделки' : 'Показать сделки'}
+                    {deals.data && <span className="ml-0.5 text-ink-300">({deals.data.total})</span>}
+                  </Button>
+                </div>
               }
             />
-            {deals.isLoading && <p className="py-6 text-center text-xs text-ink-400">Загрузка сделок…</p>}
-            {deals.data && deals.data.items.length === 0 && (
+            {dealsOpen && deals.isLoading && <p className="py-6 text-center text-xs text-ink-400">Загрузка сделок…</p>}
+            {dealsOpen && deals.error && (
+              <ErrorState message={toApiError(deals.error).message} onRetry={() => void deals.refetch()} />
+            )}
+            {dealsOpen && deals.data && deals.data.items.length === 0 && (
               <EmptyState
                 title="Сделки не найдены"
                 description="Измените период или стадию сделки, чтобы увидеть записи."
               />
             )}
-            {deals.data && deals.data.items.length > 0 && (
+            {dealsOpen && deals.data && deals.data.items.length > 0 && (
               <div className="overflow-x-auto">
                 <table className="table-shell min-w-[760px]">
                   <thead>
