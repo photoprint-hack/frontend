@@ -70,6 +70,26 @@ function relationPath(source: ImpactNode, target: ImpactNode): string {
   return `M ${sx} ${source.position!.y} C ${sx + Math.sign(dx || 1) * curve} ${source.position!.y + dy * 0.08}, ${tx - Math.sign(dx || 1) * curve} ${target.position!.y - dy * 0.08}, ${tx} ${target.position!.y}`;
 }
 
+function impactSides(graph: ImpactGraph, root: string | null) {
+  const walk = (forward: boolean) => {
+    const visited = new Set<string>();
+    const queue = [root].filter((id): id is string => Boolean(id)).map((id) => ({ id, depth: 0 }));
+    while (queue.length) {
+      const current = queue.shift()!;
+      if (current.depth >= 3) continue;
+      for (const edge of graph.edges) {
+        const next = forward ? (edge.source === current.id ? edge.target : null) : (edge.target === current.id ? edge.source : null);
+        if (next && !visited.has(next) && next !== root) {
+          visited.add(next);
+          queue.push({ id: next, depth: current.depth + 1 });
+        }
+      }
+    }
+    return visited;
+  };
+  return { upstream: walk(false), downstream: walk(true) };
+}
+
 function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge }: {
   graph: ImpactGraph; selectedNode: string | null; selectedEdge: string | null;
   path: ImpactPath | null; onNode: (node: ImpactNode) => void; onEdge: (edge: ImpactEdge) => void;
@@ -80,6 +100,7 @@ function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge 
   const nodeMap = useMemo(() => new Map(graph.nodes.map((node) => [node.id, node])), [graph.nodes]);
   const pathNodeIds = new Set(path?.nodes.map((node) => node.id) ?? []);
   const pathEdgeIds = new Set(path?.edges.map((edge) => edge.id) ?? []);
+  const { upstream, downstream } = impactSides(graph, selectedNode);
   const scaleBy = (delta: number) => setView((current) => ({ ...current, scale: Math.max(0.55, Math.min(1.65, current.scale + delta)) }));
 
   return (
@@ -118,11 +139,14 @@ function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge 
             const source = nodeMap.get(edge.source); const target = nodeMap.get(edge.target);
             if (!source?.position || !target?.position) return null;
             const onPath = pathEdgeIds.has(edge.id);
-            const active = selectedEdge === edge.id || onPath;
-            const dimmed = Boolean(path && !onPath);
+            const leadsToFocus = Boolean(selectedNode && edge.target === selectedNode || upstream.has(edge.source) && (upstream.has(edge.target) || edge.target === selectedNode));
+            const flowsFromFocus = Boolean(selectedNode && edge.source === selectedNode || downstream.has(edge.source) && downstream.has(edge.target));
+            const relationColor = leadsToFocus && flowsFromFocus ? '#c3a0ff' : leadsToFocus ? '#f2a65a' : flowsFromFocus ? '#53d3c2' : EVIDENCE_COLOR[edge.evidence_type];
+            const active = selectedEdge === edge.id || onPath || leadsToFocus || flowsFromFocus;
+            const dimmed = Boolean(path && !onPath) || Boolean(selectedNode && !active);
             return <g key={edge.id} data-map-edge="true" opacity={dimmed ? 0.12 : 1} onClick={(event) => { event.stopPropagation(); onEdge(edge); }} className="cursor-pointer transition-opacity">
               <path d={relationPath(source, target)} fill="none" stroke="transparent" strokeWidth="18" />
-              <path d={relationPath(source, target)} fill="none" stroke={onPath ? '#8db0ff' : EVIDENCE_COLOR[edge.evidence_type]} strokeWidth={active ? 4.5 : 1.7} strokeOpacity={active ? 1 : 0.58} strokeDasharray={edge.evidence_type === 'hypothesis' ? '7 6' : edge.evidence_type === 'correlated' ? '3 5' : undefined} markerEnd={`url(#arrow-${edge.evidence_type})`} filter={active ? 'url(#map-glow)' : undefined} />
+              <path d={relationPath(source, target)} fill="none" stroke={onPath ? '#8db0ff' : relationColor} strokeWidth={active ? 4.5 : 1.7} strokeOpacity={active ? 1 : 0.58} strokeDasharray={edge.evidence_type === 'hypothesis' ? '7 6' : edge.evidence_type === 'correlated' ? '3 5' : undefined} markerEnd={`url(#arrow-${edge.evidence_type})`} filter={active ? 'url(#map-glow)' : undefined} />
               {active && <text fontSize="11" fontWeight="700" paintOrder="stroke" stroke="#080d16" strokeWidth="4" fill="#e5edff" textAnchor="middle" x={(source.position.x + target.position.x) / 2} y={(source.position.y + target.position.y) / 2 - 9}>{RELATION_LABEL[edge.type]}</text>}
             </g>;
           })}
@@ -131,15 +155,17 @@ function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge 
             if (!position) return null;
             const active = selectedNode === node.id;
             const onPath = pathNodeIds.has(node.id);
-            const dimmed = Boolean(path && !onPath);
+            const inUpstream = upstream.has(node.id);
+            const inDownstream = downstream.has(node.id);
+            const dimmed = Boolean(path && !onPath) || Boolean(selectedNode && !active && !inUpstream && !inDownstream);
+            const relationColor = inUpstream && inDownstream ? '#c3a0ff' : inUpstream ? '#f2a65a' : '#53d3c2';
             const actual = node.type === 'metric' ? node.context?.actual : null;
             const target = node.type === 'metric' ? node.context?.target : null;
             const unit = node.type === 'metric' ? textValue(node.context?.unit) : '';
             const valueText = actual === null || actual === undefined ? '' : `${formatUnit(typeof actual === 'number' ? actual : null, unit)}${target === null || target === undefined ? '' : ` / ${formatUnit(typeof target === 'number' ? target : null, unit)}`}`;
             return <g key={node.id} data-map-node="true" opacity={dimmed ? 0.24 : 1} transform={`translate(${position.x - NODE_W / 2},${position.y - NODE_H / 2})`} className="cursor-pointer transition-opacity" onClick={(event) => { event.stopPropagation(); onNode(node); }} role="button" tabIndex={0} aria-label={`${KIND_LABEL[node.type]}: ${node.label}`} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onNode(node); } }}>
-              {active && <rect x="-7" y="-7" width={NODE_W + 14} height={NODE_H + 14} rx="18" fill="#5790ff" fillOpacity=".15" stroke="#83a9ff" strokeWidth="2" />}
-              {active && <rect x="-7" y="-7" width={NODE_W + 14} height={NODE_H + 14} rx="18" fill="#5790ff" fillOpacity=".15" stroke="#83a9ff" strokeWidth="2" />}
-              <rect width={NODE_W} height={NODE_H} rx="13" fill={active || onPath ? '#182947' : '#111925'} stroke={active || onPath ? '#8fb0ff' : KIND_COLOR[node.type]} strokeWidth={active ? 3.5 : onPath ? 3 : 1.2} strokeOpacity={active || onPath ? 1 : 0.58} filter={active ? 'url(#map-glow)' : undefined} />
+              {(active || inUpstream || inDownstream) && <rect x="-7" y="-7" width={NODE_W + 14} height={NODE_H + 14} rx="18" fill={active ? '#5790ff' : relationColor} fillOpacity={active ? '.16' : '.10'} stroke={active ? '#83a9ff' : relationColor} strokeWidth={active ? 2.5 : 1.8} />}
+              <rect width={NODE_W} height={NODE_H} rx="13" fill={active ? '#182947' : inUpstream || inDownstream ? '#17242d' : '#111925'} stroke={active || onPath ? '#8fb0ff' : inUpstream || inDownstream ? relationColor : KIND_COLOR[node.type]} strokeWidth={active ? 4 : onPath ? 3 : inUpstream || inDownstream ? 3 : 1.2} strokeOpacity={active || onPath || inUpstream || inDownstream ? 1 : 0.58} filter={active || inUpstream || inDownstream ? 'url(#map-glow)' : undefined} />
               <rect x="1" y="1" width="4" height={NODE_H - 2} rx="2" fill={KIND_COLOR[node.type]} />
               <circle cx="19" cy="20" r="4" fill={KIND_COLOR[node.type]} />
               <text x="30" y="24" fontSize="10" letterSpacing=".5" fill="#9ba8bc">{KIND_LABEL[node.type].toLocaleUpperCase('ru-RU')}</text>
@@ -184,28 +210,27 @@ function NodeDetails({ node, edges, graph, onClose, onAnalyze }: { node: ImpactN
 export function ImpactMapPage() {
   const { queryParams, filters } = useFilters();
   const { role, user, can } = useAuth();
-  const [tab, setTab] = useState<'map' | 'problem' | 'analysis'>('map');
+  const [tab, setTab] = useState<'map' | 'analysis'>('map');
   const [search, setSearch] = useState('');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [fromId, setFromId] = useState('');
   const [toId, setToId] = useState('');
   const [depth, setDepth] = useState(2);
-  const [direction, setDirection] = useState<ImpactDirection>('both');
   const [pathDirection, setPathDirection] = useState<ImpactDirection>('out');
   const [edgeTypes, setEdgeTypes] = useState<ImpactEdgeType[]>(EDGE_TYPES);
   const [path, setPath] = useState<ImpactPath | null>(null);
   const [analysisError, setAnalysisError] = useState('');
   const map = useQuery({ queryKey: ['impact-map', user?.id, role, queryParams], queryFn: async () => (await impactMapApi.get(queryParams)).data, staleTime: 20_000 });
   const nodeQuery = useQuery({ queryKey: ['impact-map-node', user?.id, selectedNodeId, queryParams], queryFn: async () => selectedNodeId ? (await impactMapApi.node(selectedNodeId, queryParams)).data : null, enabled: Boolean(selectedNodeId), staleTime: 15_000 });
-  const neighbors = useQuery({ queryKey: ['impact-map-neighbors', user?.id, selectedNodeId, queryParams, depth, direction, edgeTypes], queryFn: async () => selectedNodeId ? (await impactMapApi.neighbors(selectedNodeId, { ...queryParams, depth, direction, edge_types: edgeTypes.join(',') })).data : null, enabled: Boolean(selectedNodeId), staleTime: 15_000 });
-  const pathSearch = useMutation({ mutationFn: async () => { if (!fromId || !toId || fromId === toId) throw new Error('Выберите две разные точки маршрута'); return (await impactMapApi.path({ ...queryParams, from_node_id: fromId, to_node_id: toId, depth, direction: pathDirection, edge_types: edgeTypes.join(',') })).data; }, onSuccess: (result) => { setPath(result); setTab('problem'); setSelectedNodeId(fromId); } });
+  const neighbors = useQuery({ queryKey: ['impact-map-neighbors', user?.id, selectedNodeId, queryParams, depth, edgeTypes], queryFn: async () => selectedNodeId ? (await impactMapApi.neighbors(selectedNodeId, { ...queryParams, depth, direction: 'both', edge_types: edgeTypes.join(',') })).data : null, enabled: Boolean(selectedNodeId), staleTime: 15_000 });
+  const pathSearch = useMutation({ mutationFn: async () => { if (!fromId || !toId || fromId === toId) throw new Error('Выберите две разные точки маршрута'); return (await impactMapApi.path({ ...queryParams, from_node_id: fromId, to_node_id: toId, depth, direction: pathDirection, edge_types: edgeTypes.join(',') })).data; }, onSuccess: (result) => { setPath(result); setSelectedNodeId(fromId); } });
   const analyze = useMutation({ mutationFn: async () => { const node = activeGraph?.nodes.find((item) => item.id === selectedNodeId); const code = node?.entity_ref?.code; if (!code) throw new Error('Выберите KPI, чтобы подготовить анализ'); return (await impactMapApi.analyze({ metric_code: code, graph_revision: activeGraph!.graph_revision, context: { ...activeGraph!.context } })).data; }, onSuccess: () => setAnalysisError(''), onError: (error) => setAnalysisError(toApiError(error).message) });
 
   const activeGraph = neighbors.data ?? map.data;
   const filterKey = JSON.stringify(queryParams);
   useEffect(() => { setPath(null); setSelectedNodeId(null); setSelectedEdgeId(null); }, [filterKey]);
-  useEffect(() => { if (map.data?.nodes.length) { setFromId((current) => map.data!.nodes.some((node) => node.id === current) ? current : map.data!.nodes.find((node) => node.type === 'metric')?.id ?? map.data!.nodes[0]!.id); setToId((current) => map.data!.nodes.some((node) => node.id === current) ? current : map.data!.nodes.find((node) => node.type === 'risk')?.id ?? map.data!.nodes.at(-1)!.id); } }, [map.data]);
+  useEffect(() => { if (map.data?.nodes.length) { const firstKpi = map.data.nodes.find((node) => node.type === 'metric' && node.entity_ref?.code === 'on_time_orders') ?? map.data.nodes.find((node) => node.type === 'metric'); setFromId((current) => map.data!.nodes.some((node) => node.id === current) ? current : firstKpi?.id ?? map.data!.nodes[0]!.id); setToId((current) => map.data!.nodes.some((node) => node.id === current) ? current : map.data!.nodes.find((node) => node.type === 'risk')?.id ?? map.data!.nodes.at(-1)!.id); if (!selectedNodeId && firstKpi) setSelectedNodeId(firstKpi.id); } }, [map.data]);
 
   const nodes = activeGraph?.nodes ?? [];
   const edges = activeGraph?.edges ?? [];
@@ -228,7 +253,7 @@ export function ImpactMapPage() {
     {role === 'employee' && <div className="rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-xs text-ink-300">Показана только ваша рабочая область: назначенные задачи и прямо связанные записи.</div>}
 
     <div className="flex flex-wrap gap-2 border-b border-ink-800 pb-3" role="tablist" aria-label="Разделы карты влияния">
-      {[['map', 'Обзор карты', Network], ['problem', 'Найти проблему', Search], ['analysis', 'AI-разбор', Lightbulb]].map(([key, label, Icon]) => <button key={key as string} role="tab" aria-selected={tab === key} onClick={() => setTab(key as typeof tab)} className={cn('inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition', tab === key ? 'bg-ink-800 text-ink-50 ring-1 ring-ink-600' : 'text-ink-400 hover:bg-ink-900 hover:text-ink-200')}><Icon className="h-4 w-4" />{label as string}</button>)}
+      {[['map', 'Карта', Network], ['analysis', 'AI-разбор', Lightbulb]].map(([key, label, Icon]) => <button key={key as string} role="tab" aria-selected={tab === key} onClick={() => setTab(key as typeof tab)} className={cn('inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition', tab === key ? 'bg-ink-800 text-ink-50 ring-1 ring-ink-600' : 'text-ink-400 hover:bg-ink-900 hover:text-ink-200')}><Icon className="h-4 w-4" />{label as string}</button>)}
       <span className="ml-auto hidden items-center gap-1.5 self-center text-[11px] text-ink-500 sm:inline-flex"><ShieldCheck className="h-3.5 w-3.5" />Доступные данные вашей роли</span>
     </div>
 
@@ -240,7 +265,7 @@ export function ImpactMapPage() {
       </Card>
       <NodeDetails node={selectedNode} edges={connectedEdges} graph={activeGraph!} onClose={() => setSelectedNodeId(null)} onAnalyze={() => analyze.mutate()} />
     </div> : <>
-      {tab === 'problem' && <Card className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_180px_180px_auto] lg:items-end">
+      <Card className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_180px_180px_190px_auto] lg:items-end">
         <label className="block"><span className="mb-1.5 block text-xs font-medium text-ink-300">Найти показатель, риск или запись</span><div className="relative"><Search className="absolute left-3 top-2.5 h-4 w-4 text-ink-500" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Например: срок, брак, выручка" className="h-9 w-full rounded-lg border border-ink-700 bg-ink-950 pl-9 pr-3 text-sm text-ink-100 placeholder:text-ink-500 focus:border-accent-400 focus:outline-none" /></div></label>
         <label className="block text-xs text-ink-400">Начать от<select value={fromId} onChange={(event) => setFromId(event.target.value)} className="mt-1.5 h-9 w-full rounded-lg border border-ink-700 bg-ink-950 px-2 text-xs text-ink-100">{nodes.map((node) => <option key={node.id} value={node.id}>{KIND_LABEL[node.type]} · {node.label}</option>)}</select></label>
         <label className="block text-xs text-ink-400">Найти путь до<select value={toId} onChange={(event) => setToId(event.target.value)} className="mt-1.5 h-9 w-full rounded-lg border border-ink-700 bg-ink-950 px-2 text-xs text-ink-100">{nodes.map((node) => <option key={node.id} value={node.id}>{KIND_LABEL[node.type]} · {node.label}</option>)}</select></label>
@@ -249,16 +274,15 @@ export function ImpactMapPage() {
         {search && <div className="lg:col-span-4"><p className="mb-2 text-[11px] text-ink-500">Совпадения в доступной карте</p>{searchResults.length ? <div className="flex flex-wrap gap-2">{searchResults.map((node) => <button key={node.id} onClick={() => { setSelectedNodeId(node.id); setFromId(node.id); }} className="rounded-lg border border-ink-700 bg-ink-850 px-3 py-2 text-left hover:border-accent-500/60"><span className="block text-[10px] text-ink-500">{KIND_LABEL[node.type]}</span><span className="text-xs font-medium text-ink-100">{node.label}</span></button>)}</div> : <p className="text-xs text-ink-400">В этой области совпадений нет.</p>}</div>}
         {pathSearch.error && <p className="lg:col-span-4 text-xs text-signal-warn">{toApiError(pathSearch.error).message}</p>}
         {path && <p className={cn('lg:col-span-4 text-xs', path.found ? 'text-signal-ok' : 'text-signal-warn')}>{path.found ? `Показан кратчайший доступный путь: ${path.nodes.length} точек. Это маршрут исследования, а не доказательство причинности.` : 'Путь в выбранном направлении не найден. Измените направление, глубину или тип связей.'}</p>}
-      </Card>}
+      </Card>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-3">
           <Card className="space-y-3 p-3 sm:p-4">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-xs font-semibold text-ink-200">Показать вокруг выбранного KPI</span>
-              <div className="inline-flex rounded-lg border border-ink-700 bg-ink-950 p-1" aria-label="Направление обхода">
-                {([['both','Все связи'],['in','Что влияет'],['out','На что влияет']] as const).map(([value,label]) => <button key={value} onClick={() => setDirection(value)} aria-pressed={direction === value} className={cn('rounded-md px-2.5 py-1.5 text-[11px] transition', direction === value ? 'bg-accent-500 text-ink-950 font-semibold' : 'text-ink-400 hover:text-ink-100')}>{label}</button>)}
-              </div>
+              <span className="text-xs font-semibold text-ink-200">Связи выбранного KPI</span>
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-400/30 bg-amber-400/10 px-2 py-1.5 text-[11px] text-amber-200"><i className="h-2 w-2 rounded-full bg-amber-300" />Что влияет на него</span>
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-teal-400/30 bg-teal-400/10 px-2 py-1.5 text-[11px] text-teal-200"><i className="h-2 w-2 rounded-full bg-teal-300" />На что влияет он</span>
               <div className="ml-auto inline-flex items-center gap-2 text-[11px] text-ink-400"><span>Связей по цепочке</span><button onClick={() => setDepth((value) => Math.max(1, value - 1))} disabled={depth <= 1} className="h-7 w-7 rounded-md border border-ink-700 disabled:opacity-40" aria-label="Уменьшить глубину">−</button><span className="w-4 text-center font-semibold text-ink-100">{depth}</span><button onClick={() => setDepth((value) => Math.min(3, value + 1))} disabled={depth >= 3} className="h-7 w-7 rounded-md border border-ink-700 disabled:opacity-40" aria-label="Увеличить глубину">+</button></div>
               <details className="relative"><summary className="cursor-pointer list-none rounded-lg border border-ink-700 px-3 py-2 text-[11px] text-ink-300 hover:bg-ink-850">Типы связей · {edgeTypes.length === EDGE_TYPES.length ? 'Все' : edgeTypes.length}</summary><div className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-ink-700 bg-ink-900 p-3 shadow-xl"><div className="mb-2 flex justify-between text-[11px]"><span className="font-medium text-ink-100">Оставить на карте</span><button className="text-accent-300" onClick={(event) => { event.preventDefault(); setEdgeTypes(EDGE_TYPES); }}>Выбрать все</button></div>{EDGE_TYPES.map((type) => <label key={type} className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-1.5 text-xs text-ink-300 hover:bg-ink-800"><input type="checkbox" checked={edgeTypes.includes(type)} onChange={(event) => setEdgeTypes((current) => event.target.checked ? [...current, type] : current.length > 1 ? current.filter((item) => item !== type) : current)} className="accent-blue-500" />{RELATION_LABEL[type]}</label>)}<p className="mt-2 text-[10px] text-ink-500">Оставьте хотя бы один тип. Фильтр применяется ко всему обходу и поиску пути.</p></div></details>
             </div>
