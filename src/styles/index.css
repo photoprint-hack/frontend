@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink-950 text-ink-100 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-accent-400/80 ring-offset-2 ring-offset-ink-950;
+  }
+
+  ::selection {
+    @apply bg-accent-400/30 text-ink-50;
+  }
+
+  /* Скроллбары */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #343f57 transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  *::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-ink-500;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-ink-400;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer components {
+  .surface {
+    @apply rounded-2xl border border-ink-700/70 bg-ink-900/90 shadow-card;
+  }
+
+  .surface-muted {
+    @apply rounded-xl border border-ink-700/60 bg-ink-850/80;
+  }
+
+  .label-caps {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-300;
+  }
+
+  .table-shell {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .table-shell thead th {
+    @apply sticky top-0 z-10 whitespace-nowrap border-b border-ink-700 bg-ink-850 px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-300;
+  }
+
+  .table-shell tbody td {
+    @apply border-b border-ink-800/70 px-3 py-2.5 align-middle text-ink-100;
+  }
+
+  .table-shell tbody tr:hover {
+    @apply bg-ink-800/40;
+  }
+
+  .link-quiet {
+    @apply text-accent-300 underline-offset-4 transition hover:text-accent-200 hover:underline;
+  }
+
+  .scroll-shadow {
+    mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
