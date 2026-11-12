@@ -33,6 +33,7 @@ import type {
   TaskStatus,
   User,
 } from '@/types/api';
+import type { ImpactAnalysis, ImpactGraph, ImpactNode, ImpactPath } from '@/features/impact-map/types';
 import { http, createIdempotencyKey } from './client';
 
 export interface ProductionRecordDto {
@@ -305,5 +306,27 @@ export const usersApi = {
 export const analyticsApi = {
   metabaseEmbed(params?: Params) {
     return http.get<{ data: MetabaseEmbed }>('/analytics/metabase-embed', { params });
+  },
+};
+
+/** Business Impact Map endpoints from the v2 extension contract. */
+export const impactMapApi = {
+  get(params?: Params) {
+    return http.get<{ data: ImpactGraph }>('/impact-map', { params });
+  },
+  node(id: string, params?: Params) {
+    return http.get<{ data: ImpactNode }>(`/impact-map/nodes/${id}`, { params });
+  },
+  neighbors(id: string, params?: Params) {
+    return http.get<{ data: ImpactGraph }>(`/impact-map/nodes/${id}/neighbors`, { params });
+  },
+  path(params: { from_node_id: string; to_node_id: string; depth: number; direction: string } & Record<string, unknown>) {
+    return http.get<{ data: ImpactPath }>('/impact-map/paths', { params });
+  },
+  analyze(body: { metric_code: string; graph_revision: string; context: Record<string, unknown> }) {
+    return http.post<{ data: ImpactAnalysis }>('/impact-map/analyze', {
+      body,
+      headers: { 'Idempotency-Key': createIdempotencyKey() },
+    });
   },
 };

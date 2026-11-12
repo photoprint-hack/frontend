@@ -29,7 +29,7 @@ function Stat({
 }) {
   return (
     <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-      <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">{label}</p>
+      <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">{label}</p>
       <p
         className={cn(
           'mt-1 text-lg font-semibold leading-none',
@@ -41,7 +41,7 @@ function Stat({
       >
         {value}
       </p>
-      {hint && <p className="mt-1 text-[10px] text-ink-500">{hint}</p>}
+      {hint && <p className="mt-1 text-[0.625rem] text-ink-500">{hint}</p>}
     </div>
   );
 }
@@ -232,7 +232,7 @@ export function ProductionPage() {
                           <td className="text-right text-xs">
                             {formatNumber(record.actual_load, 1)} / {formatNumber(record.planned_capacity, 1)} н/ч
                           </td>
-                          <td className="text-[11px] text-ink-300">
+                          <td className="text-[0.6875rem] text-ink-300">
                             {record.cause ?? <span className="text-ink-500">—</span>}
                           </td>
                         </tr>

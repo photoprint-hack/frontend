@@ -212,7 +212,7 @@ export function DecisionDetailPage() {
             <Badge tone="info">версия {decision.version}</Badge>
             <Badge tone="idle">{formatDaysLeft(decision.deadline)}</Badge>
             {decision.alert_id && (
-              <Link to={`/alerts/${decision.alert_id}`} className="link-quiet text-[11px]">
+              <Link to={`/alerts/${decision.alert_id}`} className="link-quiet text-[0.6875rem]">
                 исходное отклонение
               </Link>
             )}
@@ -248,7 +248,7 @@ export function DecisionDetailPage() {
               <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
               Конфликт версий (409 VERSION_CONFLICT)
             </p>
-            <p className="mt-1 text-[11px] leading-relaxed text-ink-200">
+            <p className="mt-1 text-[0.6875rem] leading-relaxed text-ink-200">
               {conflict} Данные перечитаны с сервера, ваши введённые значения остались в форме. Проверьте поля и
               сохраните повторно.
             </p>
@@ -364,7 +364,7 @@ export function DecisionDetailPage() {
             </FieldShell>
 
             {!canWrite && (
-              <p className="rounded-md bg-ink-850/60 p-2 text-[11px] text-ink-400">
+              <p className="rounded-md bg-ink-850/60 p-2 text-[0.6875rem] text-ink-400">
                 Ваша роль позволяет просматривать решение, но не изменять его.
               </p>
             )}
@@ -374,7 +374,7 @@ export function DecisionDetailPage() {
         <div className="space-y-3">
           <Card>
             <CardHeader title="Сводка" icon={<CalendarClock className="h-4 w-4" />} />
-            <dl className="space-y-2 text-[11px]">
+            <dl className="space-y-2 text-[0.6875rem]">
               {[
                 ['Создано', formatDateTime(decision.created_at)],
                 ['Автор', decision.creator.full_name],
@@ -390,7 +390,7 @@ export function DecisionDetailPage() {
               ))}
             </dl>
             {isOwner && !isTerminal && (
-              <p className="mt-3 flex items-start gap-1.5 rounded-md border border-accent-400/30 bg-accent-500/10 p-2 text-[10px] leading-relaxed text-accent-200">
+              <p className="mt-3 flex items-start gap-1.5 rounded-md border border-accent-400/30 bg-accent-500/10 p-2 text-[0.625rem] leading-relaxed text-accent-200">
                 <UserRound className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
                 Вы ответственный по этому решению. Перед проверкой заполните фактический результат.
               </p>
@@ -403,16 +403,16 @@ export function DecisionDetailPage() {
               subtitle={`${tasks.data?.total ?? 0} задач`}
               icon={<CheckCircle2 className="h-4 w-4" />}
             />
-            {tasks.isLoading && <p className="py-3 text-center text-[11px] text-ink-400">Загрузка задач…</p>}
+            {tasks.isLoading && <p className="py-3 text-center text-[0.6875rem] text-ink-400">Загрузка задач…</p>}
             {tasks.data && tasks.data.items.length === 0 && (
-              <p className="py-3 text-center text-[11px] text-ink-400">Задачи не создавались.</p>
+              <p className="py-3 text-center text-[0.6875rem] text-ink-400">Задачи не создавались.</p>
             )}
             <ul className="space-y-1.5">
               {tasks.data?.items.map((task) => (
                 <li key={task.id}>
                   <Link
                     to={`/tasks/${task.id}`}
-                    className="flex items-center justify-between gap-2 rounded-md border border-ink-700/60 bg-ink-850/50 px-2 py-1.5 text-[11px] transition hover:border-accent-400/40"
+                    className="flex items-center justify-between gap-2 rounded-md border border-ink-700/60 bg-ink-850/50 px-2 py-1.5 text-[0.6875rem] transition hover:border-accent-400/40"
                   >
                     <span className="truncate text-ink-100">{task.title}</span>
                     <Badge tone={TASK_STATUS_TONES[task.status]}>{TASK_STATUS_LABELS[task.status]}</Badge>
@@ -445,22 +445,22 @@ export function DecisionDetailPage() {
           <ol className="relative space-y-3 border-l border-ink-700/70 pl-4">
             {history.data.items.map((event) => (
               <li key={event.id} className="relative">
-                <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-accent-400 ring-4 ring-ink-900" />
+                <span className="absolute -left-[1.3125rem] top-1.5 h-2 w-2 rounded-full bg-accent-400 ring-4 ring-ink-900" />
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs font-medium text-ink-50">
                     {AUDIT_ACTION_LABELS[event.action] ?? event.action}
                   </p>
-                  <span className="text-[10px] text-ink-500">{formatDateTime(event.created_at)}</span>
+                  <span className="text-[0.625rem] text-ink-500">{formatDateTime(event.created_at)}</span>
                 </div>
-                <p className="mt-0.5 text-[11px] text-ink-400">{event.changed_by?.full_name ?? 'Система'}</p>
+                <p className="mt-0.5 text-[0.6875rem] text-ink-400">{event.changed_by?.full_name ?? 'Система'}</p>
                 {Object.keys(event.new_values).length > 0 && (
-                  <p className="mt-0.5 font-mono text-[10px] leading-relaxed text-ink-500">
+                  <p className="mt-0.5 font-mono text-[0.625rem] leading-relaxed text-ink-500">
                     {Object.entries(event.new_values)
                       .map(([key, value]) => `${key}: ${String(value)}`)
                       .join(' · ')}
                   </p>
                 )}
-                {event.comment && <p className="mt-0.5 text-[11px] text-ink-300">{event.comment}</p>}
+                {event.comment && <p className="mt-0.5 text-[0.6875rem] text-ink-300">{event.comment}</p>}
               </li>
             ))}
           </ol>

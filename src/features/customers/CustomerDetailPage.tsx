@@ -68,7 +68,7 @@ export function CustomerDetailPage() {
           { label: 'Средний чек', value: formatMoney(averageCheck) },
         ].map((tile) => (
           <div key={tile.label} className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-            <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">{tile.label}</p>
+            <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">{tile.label}</p>
             <p className="mt-1 truncate text-lg font-semibold leading-none text-ink-50">{tile.value}</p>
           </div>
         ))}
@@ -77,7 +77,7 @@ export function CustomerDetailPage() {
       <div className="grid gap-3 lg:grid-cols-3">
         <Card>
           <CardHeader title="Реквизиты клиента" icon={<UserRound className="h-4 w-4" />} />
-          <dl className="space-y-2 text-[11px]">
+          <dl className="space-y-2 text-[0.6875rem]">
             {[
               ['Сегмент', SEGMENT_LABELS[customer.segment] ?? customer.segment],
               ['Тип', customer.customer_type === 'b2b' ? 'B2B' : 'B2C'],
@@ -96,7 +96,7 @@ export function CustomerDetailPage() {
               </div>
             ))}
           </dl>
-          <p className="mt-3 flex items-start gap-1.5 rounded-md border border-ink-700/60 bg-ink-850/50 p-2 text-[10px] leading-relaxed text-ink-400">
+          <p className="mt-3 flex items-start gap-1.5 rounded-md border border-ink-700/60 bg-ink-850/50 p-2 text-[0.625rem] leading-relaxed text-ink-400">
             <Building2 className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
             Контактные данные и персональная информация в демонстрационном контуре не используются.
           </p>
@@ -151,7 +151,7 @@ export function CustomerDetailPage() {
 
       <div
         className={cn(
-          'flex items-start gap-2 rounded-lg border border-ink-700/70 bg-ink-900/50 p-3 text-[11px] leading-relaxed text-ink-400',
+          'flex items-start gap-2 rounded-lg border border-ink-700/70 bg-ink-900/50 p-3 text-[0.6875rem] leading-relaxed text-ink-400',
         )}
       >
         <CalendarClock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-300" aria-hidden />
@@ -161,7 +161,7 @@ export function CustomerDetailPage() {
         </p>
       </div>
 
-      <p className="flex items-center gap-1.5 px-1 text-[11px] text-ink-500">
+      <p className="flex items-center gap-1.5 px-1 text-[0.6875rem] text-ink-500">
         <ReceiptText className="h-3 w-3" aria-hidden />
         Данные клиента загружаются из CRM и дополняются заказами ERP.
       </p>

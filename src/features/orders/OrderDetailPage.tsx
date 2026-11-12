@@ -151,7 +151,7 @@ export function OrderDetailPage() {
               ['Обновлён', formatDateTime(order.updated_at)],
             ] as [string, ReactNode][]).map(([label, value]) => (
               <div key={label} className="min-w-0">
-                <dt className="text-[10px] uppercase tracking-[0.08em] text-ink-400">{label}</dt>
+                <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{label}</dt>
                 <dd className="mt-0.5 truncate font-medium text-ink-100">{value}</dd>
               </div>
             ))}
@@ -170,12 +170,12 @@ export function OrderDetailPage() {
                 key={label as string}
                 className="flex items-center justify-between rounded-md border border-ink-700/60 bg-ink-850/50 px-2.5 py-1.5"
               >
-                <span className="text-[11px] text-ink-300">{label}</span>
+                <span className="text-[0.6875rem] text-ink-300">{label}</span>
                 <Badge tone={done ? 'ok' : 'info'}>{value as string}</Badge>
               </div>
             ))}
             {order.has_defect && (
-              <div className="flex items-center gap-1.5 rounded-md border border-signal-warn/40 bg-signal-warn/10 px-2.5 py-1.5 text-[11px] text-signal-warn">
+              <div className="flex items-center gap-1.5 rounded-md border border-signal-warn/40 bg-signal-warn/10 px-2.5 py-1.5 text-[0.6875rem] text-signal-warn">
                 <XCircle className="h-3.5 w-3.5" /> Заказ с браком — доступна перепечатка
               </div>
             )}
@@ -207,17 +207,17 @@ export function OrderDetailPage() {
                     className={cn('h-3.5 w-3.5', info.state === 'done' ? 'text-signal-ok' : 'text-ink-400')}
                     aria-hidden
                   />
-                  <span className="text-[11px] font-medium text-ink-100">
+                  <span className="text-[0.6875rem] font-medium text-ink-100">
                     {index + 1}. {stage.label}
                   </span>
                 </div>
                 {info.event ? (
                   <>
-                    <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-ink-300">{info.event.result}</p>
-                    <p className="mt-0.5 text-[10px] text-ink-500">{formatDateTime(info.event.occurred_at)}</p>
+                    <p className="mt-1 line-clamp-2 text-[0.625rem] leading-snug text-ink-300">{info.event.result}</p>
+                    <p className="mt-0.5 text-[0.625rem] text-ink-500">{formatDateTime(info.event.occurred_at)}</p>
                   </>
                 ) : (
-                  <p className="mt-1 text-[10px] text-ink-500">Нет данных</p>
+                  <p className="mt-1 text-[0.625rem] text-ink-500">Нет данных</p>
                 )}
               </li>
             );
@@ -245,21 +245,21 @@ export function OrderDetailPage() {
         <ol className="relative space-y-3 border-l border-ink-700/70 pl-4">
           {events.map((event) => (
             <li key={event.id} className="relative">
-              <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-accent-400 ring-4 ring-ink-900" />
+              <span className="absolute -left-[1.3125rem] top-1.5 h-2 w-2 rounded-full bg-accent-400 ring-4 ring-ink-900" />
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs font-medium text-ink-50">{event.result}</p>
-                <span className="text-[10px] text-ink-500">{formatDateTime(event.occurred_at)}</span>
+                <span className="text-[0.625rem] text-ink-500">{formatDateTime(event.occurred_at)}</span>
               </div>
-              <p className="mt-0.5 text-[11px] text-ink-400">
+              <p className="mt-0.5 text-[0.6875rem] text-ink-400">
                 {event.event_type} · источник: {event.source_system}
                 {event.actor ? ` · ${event.actor.full_name}` : ''}
               </p>
-              {event.description && <p className="mt-0.5 text-[11px] text-ink-300">{event.description}</p>}
+              {event.description && <p className="mt-0.5 text-[0.6875rem] text-ink-300">{event.description}</p>}
               {event.cause && (
-                <p className="mt-0.5 text-[11px] text-signal-warn">Причина: {event.cause}</p>
+                <p className="mt-0.5 text-[0.6875rem] text-signal-warn">Причина: {event.cause}</p>
               )}
               {event.old_status && event.new_status && (
-                <p className="mt-0.5 font-mono text-[10px] text-ink-500">
+                <p className="mt-0.5 font-mono text-[0.625rem] text-ink-500">
                   {event.old_status} → {event.new_status}
                 </p>
               )}
@@ -268,7 +268,7 @@ export function OrderDetailPage() {
         </ol>
       </Card>
 
-      <p className="px-1 text-[11px] text-ink-500">
+      <p className="px-1 text-[0.6875rem] text-ink-500">
         Срок: {formatDate(order.due_at)}. Изменения выполняются через API с передачей version.
       </p>
     </div>

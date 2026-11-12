@@ -218,7 +218,7 @@ export function OrdersPage() {
         />
       )}
 
-      <p className="px-1 text-[11px] text-ink-500">
+      <p className="px-1 text-[0.6875rem] text-ink-500">
         Статусы модерации, производства и доставки отображаются в карточке заказа отдельно от общего статуса.
       </p>
     </div>

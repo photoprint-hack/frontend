@@ -26,7 +26,7 @@ export function Badge({ tone = 'idle', children, icon, className, dot, title }: 
     <span
       title={title}
       className={cn(
-        'inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-0.5 text-[11px] font-medium leading-5',
+        'inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-0.5 text-[0.6875rem] font-medium leading-5',
         TONES[tone],
         className,
       )}

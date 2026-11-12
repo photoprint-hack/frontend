@@ -16,6 +16,7 @@ const TITLES: Record<string, string> = {
   '/production': 'Производство и качество',
   '/finance-hr': 'Финансы и персонал',
   '/analytics': 'Аналитика',
+  '/impact-map': 'Карта влияния',
   '/alerts': 'Отклонения',
   '/decisions': 'Управленческие решения',
   '/tasks': 'Задачи',
@@ -57,7 +58,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
           <h1 className="truncate text-sm font-semibold tracking-tight text-ink-50 sm:text-base">
             {titleFor(location.pathname)}
           </h1>
-          <p className="hidden truncate text-[11px] text-ink-400 sm:block">
+          <p className="hidden truncate text-[0.6875rem] text-ink-400 sm:block">
             {subtitle} · ООО «Фотопринт»
           </p>
         </div>
@@ -94,7 +95,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
             aria-haspopup="menu"
             aria-expanded={profileOpen}
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-accent-500/15 text-[10px] font-semibold text-accent-200 ring-1 ring-accent-400/30">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-accent-500/15 text-[0.625rem] font-semibold text-accent-200 ring-1 ring-accent-400/30">
               {initials(user?.full_name ?? '—')}
             </span>
             <span className="hidden max-w-[130px] truncate text-xs font-medium text-ink-100 md:block">
@@ -116,14 +117,14 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-ink-50">{user?.full_name}</p>
-                    <p className="truncate text-[11px] text-ink-400">{user?.email}</p>
+                    <p className="truncate text-[0.6875rem] text-ink-400">{user?.email}</p>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1.5 rounded-lg bg-ink-850/70 p-2.5">
-                  <p className="flex items-center gap-1.5 text-[11px] font-medium text-accent-300">
+                  <p className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-accent-300">
                     <ShieldCheck className="h-3.5 w-3.5" /> {role ? ROLE_LABELS[role] : '—'}
                   </p>
-                  <p className="text-[11px] leading-relaxed text-ink-300">{role ? ROLE_DESCRIPTIONS[role] : ''}</p>
+                  <p className="text-[0.6875rem] leading-relaxed text-ink-300">{role ? ROLE_DESCRIPTIONS[role] : ''}</p>
                 </div>
                 <div className="mt-2 space-y-0.5">
                   <button

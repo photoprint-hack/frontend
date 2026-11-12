@@ -42,19 +42,19 @@ export function KpiCard({ kpi }: { kpi: Kpi }) {
       />
 
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-[11px] font-medium uppercase tracking-[0.08em] text-ink-300">{kpi.name}</p>
-          <p className="mt-1.5 truncate text-xl font-semibold leading-none tracking-tight text-ink-50">
-            {formatUnit(kpi.actual, kpi.unit)}
-          </p>
-        </div>
-        <Badge tone={tone} title={METRIC_STATUS_HINT[kpi.status]} dot className="mt-0.5 shrink-0">
+        <p className="text-[0.6875rem] font-medium uppercase leading-tight tracking-[0.08em] text-ink-300 line-clamp-2">
+          {kpi.name}
+        </p>
+        <Badge tone={tone} title={METRIC_STATUS_HINT[kpi.status]} dot className="shrink-0">
           {METRIC_STATUS_LABELS[kpi.status]}
         </Badge>
       </div>
+      <p className="text-xl font-semibold leading-none tracking-tight text-ink-50">
+        {formatUnit(kpi.actual, kpi.unit)}
+      </p>
 
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between gap-2 text-[11px]">
+        <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
           <span className="text-ink-400">
             План:{' '}
             <span className="font-medium text-ink-200">
@@ -95,7 +95,7 @@ export function KpiCard({ kpi }: { kpi: Kpi }) {
           />
         </div>
 
-        <div className="flex items-center justify-between gap-2 text-[10px] text-ink-500">
+        <div className="flex items-center justify-between gap-2 text-[0.625rem] text-ink-500">
           <span>
             Выполнение:{' '}
             <span className="text-ink-300">
@@ -119,13 +119,13 @@ export function KpiCard({ kpi }: { kpi: Kpi }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-2 border-t border-ink-800/80 pt-1.5 text-[10px] text-ink-500">
+      <div className="flex items-center justify-between gap-2 border-t border-ink-800/80 pt-1.5 text-[0.625rem] text-ink-500">
         <span className="truncate">Источник: {kpi.source.join(', ')}</span>
         <span className="shrink-0">{formatDateTime(kpi.updated_at)}</span>
       </div>
 
       {kpi.notices.length > 0 && (
-        <p className="rounded-md bg-ink-800/60 px-2 py-1 text-[10px] leading-snug text-ink-400">
+        <p className="rounded-md bg-ink-800/60 px-2 py-1 text-[0.625rem] leading-snug text-ink-400">
           {kpi.notices[0]}
         </p>
       )}

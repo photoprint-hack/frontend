@@ -312,8 +312,8 @@ export function DecisionCreatePage() {
                 icon={<Info className="h-4 w-4" />}
               />
               <p className="text-xs font-medium text-ink-100">{alert.title}</p>
-              <p className="mt-1 text-[11px] leading-relaxed text-ink-400">{alert.description}</p>
-              <dl className="mt-3 space-y-2 text-[11px]">
+              <p className="mt-1 text-[0.6875rem] leading-relaxed text-ink-400">{alert.description}</p>
+              <dl className="mt-3 space-y-2 text-[0.6875rem]">
                 {[
                   ['Показатель', alertQuery.data?.metric.name ?? alert.metric_name],
                   ['Факт', formatUnit(alert.actual, alertQuery.data?.metric.unit ?? '%')],
@@ -327,7 +327,7 @@ export function DecisionCreatePage() {
                   </div>
                 ))}
               </dl>
-              <Link to={`/alerts/${alert.id}`} className="link-quiet mt-3 inline-block text-[11px]">
+              <Link to={`/alerts/${alert.id}`} className="link-quiet mt-3 inline-block text-[0.6875rem]">
                 Открыть карточку отклонения
               </Link>
             </Card>
@@ -335,7 +335,7 @@ export function DecisionCreatePage() {
 
           <Card>
             <CardHeader title="Как заполнять" subtitle="Подсказки по методике" />
-            <ul className="space-y-2 text-[11px] leading-relaxed text-ink-300">
+            <ul className="space-y-2 text-[0.6875rem] leading-relaxed text-ink-300">
               <li>
                 <span className="font-medium text-ink-100">Проблема</span> — факт из данных, без оценок и эмоций.
               </li>
@@ -350,7 +350,7 @@ export function DecisionCreatePage() {
                 <span className="font-medium text-ink-100">Результат</span> — измеримое целевое значение показателя.
               </li>
             </ul>
-            <p className="mt-3 rounded-md bg-ink-850/60 p-2 text-[10px] leading-relaxed text-ink-500">
+            <p className="mt-3 rounded-md bg-ink-850/60 p-2 text-[0.625rem] leading-relaxed text-ink-500">
               После создания решение проходит проверку результата: перед завершением потребуется комментарий
               верификации, а перед отправкой на проверку — фактический результат.
             </p>

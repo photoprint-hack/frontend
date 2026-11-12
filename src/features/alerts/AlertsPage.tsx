@@ -57,7 +57,7 @@ export function AlertsPage() {
       render: (row) => (
         <div className="min-w-0">
           <p className="truncate text-xs font-medium text-ink-50">{row.title}</p>
-          <p className="mt-0.5 line-clamp-1 text-[11px] text-ink-400">{row.description}</p>
+          <p className="mt-0.5 line-clamp-1 text-[0.6875rem] text-ink-400">{row.description}</p>
         </div>
       ),
     },
@@ -103,7 +103,7 @@ export function AlertsPage() {
       key: 'period',
       header: 'Период',
       render: (row) => (
-        <span className="whitespace-nowrap text-[11px] text-ink-400">
+        <span className="whitespace-nowrap text-[0.6875rem] text-ink-400">
           {formatDate(row.period_start)} — {formatDate(row.period_end)}
         </span>
       ),
@@ -124,7 +124,7 @@ export function AlertsPage() {
       key: 'created_at',
       header: 'Создано',
       render: (row) => (
-        <span className="whitespace-nowrap text-[11px] text-ink-500">{formatDateTime(row.created_at)}</span>
+        <span className="whitespace-nowrap text-[0.6875rem] text-ink-500">{formatDateTime(row.created_at)}</span>
       ),
     },
   ];
@@ -198,7 +198,7 @@ export function AlertsPage() {
             Сбросить
           </Button>
         )}
-        <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-ink-500">
+        <span className="ml-auto inline-flex items-center gap-1.5 text-[0.6875rem] text-ink-500">
           <BellRing className="h-3 w-3" aria-hidden />
           Статус меняется из карточки отклонения
         </span>
@@ -247,7 +247,7 @@ export function AlertsPage() {
 
 function CardNote() {
   return (
-    <div className="flex items-start gap-2 rounded-lg border border-ink-700/70 bg-ink-900/50 p-3 text-[11px] leading-relaxed text-ink-400">
+    <div className="flex items-start gap-2 rounded-lg border border-ink-700/70 bg-ink-900/50 p-3 text-[0.6875rem] leading-relaxed text-ink-400">
       <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-signal-warn" aria-hidden />
       <p>
         Отклонение создаётся автоматически при выходе показателя за допустимый коридор. Значения «факт / план»

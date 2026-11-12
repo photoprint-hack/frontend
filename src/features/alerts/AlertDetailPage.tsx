@@ -135,7 +135,7 @@ export function AlertDetailPage() {
               ['Создано', formatDateTime(alert.created_at)],
             ].map(([label, value]) => (
               <div key={label} className="min-w-0">
-                <dt className="text-[10px] uppercase tracking-[0.08em] text-ink-400">{label}</dt>
+                <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{label}</dt>
                 <dd className="mt-0.5 truncate font-medium text-ink-100">{value}</dd>
               </div>
             ))}
@@ -145,8 +145,8 @@ export function AlertDetailPage() {
             <Badge tone={STATUS_TONE[metric.status]} title={METRIC_STATUS_HINT[metric.status]}>
               {METRIC_STATUS_LABELS[metric.status]}
             </Badge>
-            <span className="text-[11px] text-ink-400">{metric.formula}</span>
-            <Link to={`/metrics/${metric.code}`} className="link-quiet ml-auto text-[11px]">
+            <span className="text-[0.6875rem] text-ink-400">{metric.formula}</span>
+            <Link to={`/metrics/${metric.code}`} className="link-quiet ml-auto text-[0.6875rem]">
               Открыть показатель
             </Link>
           </div>
@@ -158,7 +158,7 @@ export function AlertDetailPage() {
             {detail.causes.map((cause) => (
               <li
                 key={cause.text}
-                className="rounded-md border border-ink-700/60 bg-ink-850/50 p-2.5 text-[11px] leading-relaxed text-ink-200"
+                className="rounded-md border border-ink-700/60 bg-ink-850/50 p-2.5 text-[0.6875rem] leading-relaxed text-ink-200"
               >
                 <div className="flex items-start justify-between gap-2">
                   <span>{cause.text}</span>
@@ -292,25 +292,25 @@ export function AlertDetailPage() {
           <ol className="relative space-y-3 border-l border-ink-700/70 pl-4">
             {history.data.items.map((event) => (
               <li key={event.id} className="relative">
-                <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-accent-400 ring-4 ring-ink-900" />
+                <span className="absolute -left-[1.3125rem] top-1.5 h-2 w-2 rounded-full bg-accent-400 ring-4 ring-ink-900" />
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs font-medium text-ink-50">
                     {AUDIT_ACTION_LABELS[event.action] ?? event.action}
                   </p>
-                  <span className="text-[10px] text-ink-500">{formatDateTime(event.created_at)}</span>
+                  <span className="text-[0.625rem] text-ink-500">{formatDateTime(event.created_at)}</span>
                 </div>
-                <p className="mt-0.5 text-[11px] text-ink-400">
+                <p className="mt-0.5 text-[0.6875rem] text-ink-400">
                   {event.changed_by?.full_name ?? 'Система'}
                   {event.old_values.status ? ` · ${String(event.old_values.status)} → ${String(event.new_values.status)}` : ''}
                 </p>
-                {event.comment && <p className="mt-0.5 text-[11px] text-ink-300">{event.comment}</p>}
+                {event.comment && <p className="mt-0.5 text-[0.6875rem] text-ink-300">{event.comment}</p>}
               </li>
             ))}
           </ol>
         )}
       </Card>
 
-      <p className="px-1 text-[11px] text-ink-500">
+      <p className="px-1 text-[0.6875rem] text-ink-500">
         Отклонение {alert.status === 'resolved' ? 'закрыто' : 'остаётся открытым'} · обновлено{' '}
         {formatDateTime(alert.updated_at)} · фактическое значение показателя: {formatUnit(alert.actual, metric.unit)}
         {alert.deviation_percent !== null && ` (${formatPercent(alert.deviation_percent)} от плана)`}

@@ -192,17 +192,17 @@ export function TaskDetailPage() {
             <Badge tone="info">версия {task.version}</Badge>
             <Badge tone={task.is_overdue ? 'bad' : 'idle'}>{formatDaysLeft(task.deadline)}</Badge>
             {task.decision_id && (
-              <Link to={`/decisions/${task.decision_id}`} className="link-quiet text-[11px]">
+              <Link to={`/decisions/${task.decision_id}`} className="link-quiet text-[0.6875rem]">
                 решение
               </Link>
             )}
             {task.alert_id && (
-              <Link to={`/alerts/${task.alert_id}`} className="link-quiet text-[11px]">
+              <Link to={`/alerts/${task.alert_id}`} className="link-quiet text-[0.6875rem]">
                 отклонение
               </Link>
             )}
             {task.order_id && (
-              <Link to={`/orders/${task.order_id}`} className="link-quiet text-[11px]">
+              <Link to={`/orders/${task.order_id}`} className="link-quiet text-[0.6875rem]">
                 заказ
               </Link>
             )}
@@ -258,7 +258,7 @@ export function TaskDetailPage() {
               <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
               Конфликт версий (409 VERSION_CONFLICT)
             </p>
-            <p className="mt-1 text-[11px] leading-relaxed text-ink-200">
+            <p className="mt-1 text-[0.6875rem] leading-relaxed text-ink-200">
               {conflict} Данные перечитаны, введённые значения сохранены в форме — проверьте и повторите сохранение.
             </p>
           </div>
@@ -343,7 +343,7 @@ export function TaskDetailPage() {
               </FieldShell>
             )}
             {!canEdit && !isTerminal && (
-              <p className="rounded-md bg-ink-850/60 p-2 text-[11px] text-ink-400">
+              <p className="rounded-md bg-ink-850/60 p-2 text-[0.6875rem] text-ink-400">
                 Редактирование доступно исполнителю задачи и руководящим ролям.
               </p>
             )}
@@ -352,7 +352,7 @@ export function TaskDetailPage() {
 
         <Card>
           <CardHeader title="Сводка" />
-          <dl className="space-y-2 text-[11px]">
+          <dl className="space-y-2 text-[0.6875rem]">
             {[
               ['Подразделение', task.department_name],
               ['Автор', task.creator.full_name],
@@ -369,7 +369,7 @@ export function TaskDetailPage() {
             ))}
           </dl>
           {isAssignee && !isTerminal && (
-            <p className="mt-3 rounded-md border border-accent-400/30 bg-accent-500/10 p-2 text-[10px] leading-relaxed text-accent-200">
+            <p className="mt-3 rounded-md border border-accent-400/30 bg-accent-500/10 p-2 text-[0.625rem] leading-relaxed text-accent-200">
               Вы исполнитель этой задачи: можно взять её в работу и завершить.
             </p>
           )}
@@ -397,15 +397,15 @@ export function TaskDetailPage() {
           <ol className="relative space-y-3 border-l border-ink-700/70 pl-4">
             {history.data.items.map((event) => (
               <li key={event.id} className="relative">
-                <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-accent-400 ring-4 ring-ink-900" />
+                <span className="absolute -left-[1.3125rem] top-1.5 h-2 w-2 rounded-full bg-accent-400 ring-4 ring-ink-900" />
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs font-medium text-ink-50">
                     {AUDIT_ACTION_LABELS[event.action] ?? event.action}
                   </p>
-                  <span className="text-[10px] text-ink-500">{formatDateTime(event.created_at)}</span>
+                  <span className="text-[0.625rem] text-ink-500">{formatDateTime(event.created_at)}</span>
                 </div>
-                <p className="mt-0.5 text-[11px] text-ink-400">{event.changed_by?.full_name ?? 'Система'}</p>
-                {event.comment && <p className="mt-0.5 text-[11px] text-ink-300">{event.comment}</p>}
+                <p className="mt-0.5 text-[0.6875rem] text-ink-400">{event.changed_by?.full_name ?? 'Система'}</p>
+                {event.comment && <p className="mt-0.5 text-[0.6875rem] text-ink-300">{event.comment}</p>}
               </li>
             ))}
           </ol>

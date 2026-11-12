@@ -22,7 +22,7 @@ export function SkeletonBlock({ className }: { className?: string }) {
 
 export function CardSkeletonGrid({ count = 8 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 min-[2100px]:grid-cols-4">
       {Array.from({ length: count }).map((_, index) => (
         <div key={index} className="surface space-y-3 p-4">
           <SkeletonBlock className="h-3 w-24" />

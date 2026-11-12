@@ -84,7 +84,7 @@ export function DataTable<T>({
                         onClick={() => onSortChange(column.key, active && sortOrder === 'desc' ? 'asc' : 'desc')}
                       >
                         {column.header}
-                        <span aria-hidden className="text-[9px]">
+                        <span aria-hidden className="text-[0.5625rem]">
                           {active ? (sortOrder === 'desc' ? '▼' : '▲') : '⇅'}
                         </span>
                       </button>

@@ -49,7 +49,7 @@ function MockBiPreview() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="text-xs font-semibold text-ink-100">Дашборд Metabase · «Оборот и маржа по месяцам»</p>
-          <p className="mt-0.5 text-[11px] text-ink-400">
+          <p className="mt-0.5 text-[0.6875rem] text-ink-400">
             Демонстрационный график. После подключения Metabase здесь появится актуальная аналитика.
           </p>
         </div>
@@ -67,7 +67,7 @@ function MockBiPreview() {
                 aria-hidden
               />
             </div>
-            <span className="text-[10px] text-ink-400">{bar.label}</span>
+            <span className="text-[0.625rem] text-ink-400">{bar.label}</span>
           </div>
         ))}
       </div>
@@ -144,7 +144,7 @@ export function AnalyticsPage() {
             subtitle="Отчёты обновляются с учётом выбранного периода и подразделения"
             icon={<BarChart3 className="h-4 w-4" />}
             action={
-              <span className="flex items-center gap-1.5 text-[11px] text-ink-400">
+              <span className="flex items-center gap-1.5 text-[0.6875rem] text-ink-400">
                 <Lock className="h-3 w-3" aria-hidden /> защищённый контур
               </span>
             }
@@ -167,12 +167,12 @@ export function AnalyticsPage() {
                     {embedError.status === 503 ? 'BI-сервис временно недоступен' : 'Встраивание недоступно'}
                   </p>
                   <p className="mt-1 max-w-xl text-xs leading-relaxed text-ink-200">{embedError.message}</p>
-                  <p className="mt-1.5 text-[11px] text-ink-400">
+                  <p className="mt-1.5 text-[0.6875rem] text-ink-400">
                     Публичная резервная ссылка намеренно не используется: дашборд доступен только по подписанному
                     URL. Повторите запрос позже или обратитесь к администратору.
                   </p>
                   {embedError.requestId && (
-                    <p className="mt-1 font-mono text-[10px] text-ink-500">request_id: {embedError.requestId}</p>
+                    <p className="mt-1 font-mono text-[0.625rem] text-ink-500">request_id: {embedError.requestId}</p>
                   )}
                 </div>
                 <Button
@@ -201,7 +201,7 @@ export function AnalyticsPage() {
                   sandbox="allow-scripts allow-same-origin allow-popups"
                 />
               )}
-              <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-ink-500">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[0.6875rem] text-ink-500">
                 <span>
                   Срок действия ссылки: {formatDateTime(embed.data.expires_at)}. После истечения обновите встраивание.
                 </span>
@@ -276,7 +276,7 @@ export function AnalyticsPage() {
                         {METRIC_STATUS_LABELS[kpi.status]}
                       </Badge>
                     </td>
-                    <td className="whitespace-nowrap text-[11px] text-ink-400">{kpi.source.join(', ')}</td>
+                    <td className="whitespace-nowrap text-[0.6875rem] text-ink-400">{kpi.source.join(', ')}</td>
                   </tr>
                 ))}
               </tbody>

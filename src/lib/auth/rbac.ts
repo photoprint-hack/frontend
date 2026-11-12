@@ -22,7 +22,8 @@ export type Capability =
   | 'dataQuality.view'
   | 'dataQuality.run'
   | 'forecast.view'
-  | 'bi.view';
+  | 'bi.view'
+  | 'impactMap.view';
 
 const STAFF: Role[] = ['admin', 'director', 'manager', 'analyst'];
 
@@ -48,6 +49,7 @@ const MATRIX: Record<Capability, Role[]> = {
   'dataQuality.run': ['admin', 'analyst'],
   'forecast.view': ['admin', 'director', 'manager', 'analyst'],
   'bi.view': STAFF,
+  'impactMap.view': ['admin', 'director', 'manager', 'analyst', 'employee'],
 };
 
 export function can(role: Role | undefined | null, capability: Capability): boolean {
@@ -69,6 +71,7 @@ export interface NavVisibility {
   production: boolean;
   financeHr: boolean;
   analytics: boolean;
+  impactMap: boolean;
   alerts: boolean;
   decisions: boolean;
   tasks: boolean;
@@ -85,6 +88,7 @@ export function navVisibility(role: Role | undefined | null): NavVisibility {
     production: can(role, 'production.view'),
     financeHr: can(role, 'finance.view'),
     analytics: can(role, 'bi.view'),
+    impactMap: can(role, 'impactMap.view'),
     alerts: can(role, 'analytics.view'),
     decisions: can(role, 'decisions.read'),
     tasks: can(role, 'tasks.read'),

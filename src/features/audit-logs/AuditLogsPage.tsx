@@ -45,7 +45,7 @@ export function AuditLogsPage() {
       key: 'created_at',
       header: 'Время',
       render: (row) => (
-        <span className="whitespace-nowrap text-[11px] text-ink-300">{formatDateTime(row.created_at)}</span>
+        <span className="whitespace-nowrap text-[0.6875rem] text-ink-300">{formatDateTime(row.created_at)}</span>
       ),
     },
     {
@@ -54,7 +54,7 @@ export function AuditLogsPage() {
       render: (row) => (
         <div className="min-w-0">
           <p className="truncate text-xs text-ink-100">{row.actor?.full_name ?? 'Система'}</p>
-          <p className="truncate text-[10px] text-ink-500">{row.actor_type === 'system' ? 'автоматически' : row.ip_address}</p>
+          <p className="truncate text-[0.625rem] text-ink-500">{row.actor_type === 'system' ? 'автоматически' : row.ip_address}</p>
         </div>
       ),
     },
@@ -64,7 +64,7 @@ export function AuditLogsPage() {
       render: (row) => (
         <div className="min-w-0">
           <p className="truncate text-xs text-ink-100">{AUDIT_ACTION_LABELS[row.action] ?? row.action}</p>
-          <p className="truncate font-mono text-[10px] text-ink-500">{row.action}</p>
+          <p className="truncate font-mono text-[0.625rem] text-ink-500">{row.action}</p>
         </div>
       ),
     },
@@ -74,7 +74,7 @@ export function AuditLogsPage() {
       render: (row) => (
         <div className="min-w-0">
           <p className="truncate text-xs text-ink-200">{row.object_name ?? '—'}</p>
-          <p className="truncate font-mono text-[10px] text-ink-500">{row.object_type}</p>
+          <p className="truncate font-mono text-[0.625rem] text-ink-500">{row.object_type}</p>
         </div>
       ),
     },
@@ -91,7 +91,7 @@ export function AuditLogsPage() {
       key: 'request_id',
       header: 'Request ID',
       render: (row) => (
-        <span className="font-mono text-[10px] text-ink-500">{row.request_id.slice(0, 8)}</span>
+        <span className="font-mono text-[0.625rem] text-ink-500">{row.request_id.slice(0, 8)}</span>
       ),
     },
   ];
@@ -238,7 +238,7 @@ export function AuditLogsPage() {
           />
         ) : (
           <div className="space-y-3">
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] sm:grid-cols-4">
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-[0.6875rem] sm:grid-cols-4">
               {[
                 ['Пользователь', selected.actor?.full_name ?? 'Система'],
                 ['Тип актора', selected.actor_type],
@@ -250,7 +250,7 @@ export function AuditLogsPage() {
                 ['Ошибка', selected.error_message ?? '—'],
               ].map(([label, value]) => (
                 <div key={label} className="min-w-0">
-                  <dt className="text-[10px] uppercase tracking-[0.08em] text-ink-400">{label}</dt>
+                  <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{label}</dt>
                   <dd className="mt-0.5 truncate font-medium text-ink-100" title={String(value)}>
                     {value}
                   </dd>
@@ -266,10 +266,10 @@ export function AuditLogsPage() {
                 ] as const
               ).map(([label, payload]) => (
                 <div key={label} className="rounded-lg border border-ink-700/60 bg-ink-850/50 p-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.08em] text-ink-400">{label}</p>
+                  <p className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{label}</p>
                   <pre
                     className={cn(
-                      'mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-relaxed',
+                      'mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-all font-mono text-[0.625rem] leading-relaxed',
                       payload ? 'text-ink-200' : 'text-ink-500',
                     )}
                   >
@@ -281,8 +281,8 @@ export function AuditLogsPage() {
 
             {selected.details && (
               <div className="rounded-lg border border-ink-700/60 bg-ink-850/50 p-2.5">
-                <p className="text-[10px] uppercase tracking-[0.08em] text-ink-400">Дополнительно</p>
-                <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-relaxed text-ink-200">
+                <p className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">Дополнительно</p>
+                <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-all font-mono text-[0.625rem] leading-relaxed text-ink-200">
                   {JSON.stringify(selected.details, null, 2)}
                 </pre>
               </div>

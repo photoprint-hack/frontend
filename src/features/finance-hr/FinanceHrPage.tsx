@@ -79,7 +79,7 @@ function PlanFactTable({
           </tbody>
         </table>
       </div>
-      <p className="px-4 py-2.5 text-[11px] text-ink-500">
+      <p className="px-4 py-2.5 text-[0.6875rem] text-ink-500">
         План берётся из таблицы планов периода. Значения отображаются как есть, без пересчёта на клиенте.
       </p>
     </Card>
@@ -152,7 +152,7 @@ export function FinanceHrPage() {
               { label: 'Операционные расходы', value: formatMoney(data.operating_cost) },
             ].map((tile) => (
               <div key={tile.label} className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-                <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">{tile.label}</p>
+                <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">{tile.label}</p>
                 <p className="mt-1 truncate text-base font-semibold leading-none text-ink-50">{tile.value}</p>
               </div>
             ))}
@@ -237,7 +237,7 @@ export function FinanceHrPage() {
               { label: 'Отсутствия', value: formatNumber(hrData.absences_count) },
             ].map((tile) => (
               <div key={tile.label} className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-2.5">
-                <p className="text-[10px] uppercase tracking-[0.08em] text-ink-400">{tile.label}</p>
+                <p className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{tile.label}</p>
                 <p className="mt-1 text-base font-semibold leading-none text-ink-50">{tile.value}</p>
               </div>
             ))}
@@ -279,7 +279,7 @@ export function FinanceHrPage() {
           </div>
 
           {hrData.context.ignored_filters.includes('product_id') && (
-            <p className="mt-2 text-[11px] text-ink-500">
+            <p className="mt-2 text-[0.6875rem] text-ink-500">
               Кадровые показатели не детализируются по продукту — фильтр продукта игнорируется.
             </p>
           )}

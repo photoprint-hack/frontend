@@ -129,12 +129,12 @@ export function UsersPage() {
       header: 'Сотрудник',
       render: (row) => (
         <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-[10px] font-semibold text-accent-200 ring-1 ring-accent-400/30">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-[0.625rem] font-semibold text-accent-200 ring-1 ring-accent-400/30">
             {initials(row.full_name)}
           </span>
           <div className="min-w-0">
             <p className="truncate text-xs font-medium text-ink-50">{row.full_name}</p>
-            <p className="truncate text-[10px] text-ink-500">{row.email}</p>
+            <p className="truncate text-[0.625rem] text-ink-500">{row.email}</p>
           </div>
         </div>
       ),
@@ -147,7 +147,7 @@ export function UsersPage() {
           <Badge tone={row.role === 'admin' ? 'violet' : row.role === 'director' ? 'accent' : 'info'}>
             {ROLE_LABELS[row.role]}
           </Badge>
-          <p className="mt-1 line-clamp-1 text-[10px] text-ink-500">{ROLE_DESCRIPTIONS[row.role]}</p>
+          <p className="mt-1 line-clamp-1 text-[0.625rem] text-ink-500">{ROLE_DESCRIPTIONS[row.role]}</p>
         </div>
       ),
     },
@@ -173,7 +173,7 @@ export function UsersPage() {
       key: 'created_at',
       header: 'Создан',
       render: (row) => (
-        <span className="whitespace-nowrap text-[11px] text-ink-500">{formatDateTime(row.created_at)}</span>
+        <span className="whitespace-nowrap text-[0.6875rem] text-ink-500">{formatDateTime(row.created_at)}</span>
       ),
     },
     {
@@ -464,11 +464,11 @@ export function UsersPage() {
                 <ShieldCheck className="h-3.5 w-3.5 text-accent-300" aria-hidden />
                 {ROLE_LABELS[code]}
               </p>
-              <p className="mt-1 text-[10px] leading-relaxed text-ink-400">{ROLE_DESCRIPTIONS[code]}</p>
+              <p className="mt-1 text-[0.625rem] leading-relaxed text-ink-400">{ROLE_DESCRIPTIONS[code]}</p>
             </div>
           ))}
         </div>
-        <p className="mt-3 text-[11px] leading-relaxed text-ink-500">
+        <p className="mt-3 text-[0.6875rem] leading-relaxed text-ink-500">
           Нельзя изменить собственную роль и деактивировать последнего администратора — Backend возвращает 409
           INVALID_STATUS_TRANSITION.
         </p>

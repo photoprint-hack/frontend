@@ -16,6 +16,7 @@ const FILTER_ROUTES = [
   '/production',
   '/finance-hr',
   '/analytics',
+  '/impact-map',
   '/alerts',
   '/decisions',
   '/data-quality',
@@ -72,10 +73,12 @@ export function AppLayout() {
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <main className="min-w-0 flex-1 px-3 py-4 sm:px-5 sm:py-5">
-          <Outlet />
+        <main className="min-w-0 flex-1 px-3 py-4 sm:px-5 sm:py-5 xl:px-8 xl:py-7">
+          <div className="mx-auto w-full max-w-[1680px]">
+            <Outlet />
+          </div>
         </main>
-        <footer className="border-t border-ink-800/70 px-4 py-3 text-[11px] text-ink-500">
+        <footer className="border-t border-ink-800/70 px-4 py-3 text-[0.6875rem] text-ink-500">
           ООО «Фотопринт» · Единая система управления компанией · Демонстрационные данные
         </footer>
       </div>

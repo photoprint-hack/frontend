@@ -30,11 +30,11 @@ export function FieldShell({
       )}
       {children}
       {error ? (
-        <p className="text-[11px] font-medium text-signal-bad" role="alert">
+        <p className="text-[0.6875rem] font-medium text-signal-bad" role="alert">
           {error}
         </p>
       ) : (
-        hint && <p className="text-[11px] text-ink-300">{hint}</p>
+        hint && <p className="text-[0.6875rem] text-ink-300">{hint}</p>
       )}
     </div>
   );

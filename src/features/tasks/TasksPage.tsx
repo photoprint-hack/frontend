@@ -158,7 +158,7 @@ export function TasksPage() {
         render: (row) => (
           <div className="min-w-0 max-w-sm">
             <p className="truncate text-xs font-medium text-ink-50">{row.title}</p>
-            <p className="mt-0.5 truncate text-[11px] text-ink-400">
+            <p className="mt-0.5 truncate text-[0.6875rem] text-ink-400">
               {row.decision_title ?? row.alert_title ?? row.department_name}
             </p>
           </div>
@@ -187,7 +187,7 @@ export function TasksPage() {
         render: (row) => (
           <div className="min-w-0">
             <p className="truncate text-xs text-ink-100">{row.assignee.full_name}</p>
-            <p className="truncate text-[10px] text-ink-500">{row.department_name}</p>
+            <p className="truncate text-[0.625rem] text-ink-500">{row.department_name}</p>
           </div>
         ),
       },
@@ -197,7 +197,7 @@ export function TasksPage() {
         render: (row) => (
           <div className="whitespace-nowrap">
             <p className="text-xs text-ink-200">{formatDate(row.deadline)}</p>
-            <p className={cn('text-[10px]', row.is_overdue ? 'text-signal-bad' : 'text-ink-500')}>
+            <p className={cn('text-[0.625rem]', row.is_overdue ? 'text-signal-bad' : 'text-ink-500')}>
               {formatDaysLeft(row.deadline)}
             </p>
           </div>
@@ -207,14 +207,14 @@ export function TasksPage() {
         key: 'created_at',
         header: 'Создана',
         render: (row) => (
-          <span className="whitespace-nowrap text-[11px] text-ink-500">{formatDateTime(row.created_at)}</span>
+          <span className="whitespace-nowrap text-[0.6875rem] text-ink-500">{formatDateTime(row.created_at)}</span>
         ),
       },
       {
         key: 'version',
         header: 'Версия',
         align: 'right',
-        render: (row) => <span className="font-mono text-[11px] text-ink-400">v{row.version}</span>,
+        render: (row) => <span className="font-mono text-[0.6875rem] text-ink-400">v{row.version}</span>,
       },
     ],
     [],

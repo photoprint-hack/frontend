@@ -62,7 +62,7 @@ export function DecisionsPage() {
         render: (row) => (
           <div className="min-w-0 max-w-md">
             <p className="truncate text-xs font-medium text-ink-50">{row.title}</p>
-            <p className="mt-0.5 line-clamp-1 text-[11px] text-ink-400">{row.problem}</p>
+            <p className="mt-0.5 line-clamp-1 text-[0.6875rem] text-ink-400">{row.problem}</p>
           </div>
         ),
       },
@@ -86,7 +86,7 @@ export function DecisionsPage() {
         render: (row) => (
           <div className="min-w-0">
             <p className="truncate text-xs text-ink-100">{row.owner.full_name}</p>
-            <p className="truncate text-[10px] text-ink-500">{row.department_name ?? 'Компания'}</p>
+            <p className="truncate text-[0.625rem] text-ink-500">{row.department_name ?? 'Компания'}</p>
           </div>
         ),
       },
@@ -100,7 +100,7 @@ export function DecisionsPage() {
           return (
             <div className="whitespace-nowrap">
               <p className="text-xs text-ink-200">{formatDate(row.deadline)}</p>
-              <p className={cn('text-[10px]', overdue ? 'text-signal-bad' : 'text-ink-500')}>
+              <p className={cn('text-[0.625rem]', overdue ? 'text-signal-bad' : 'text-ink-500')}>
                 {formatDaysLeft(row.deadline)}
               </p>
             </div>
@@ -115,12 +115,12 @@ export function DecisionsPage() {
             <Link
               to={`/alerts/${row.alert_id}`}
               onClick={(event) => event.stopPropagation()}
-              className="link-quiet line-clamp-1 max-w-[180px] text-[11px]"
+              className="link-quiet line-clamp-1 max-w-[180px] text-[0.6875rem]"
             >
               {row.alert_title}
             </Link>
           ) : (
-            <span className="text-[11px] text-ink-500">—</span>
+            <span className="text-[0.6875rem] text-ink-500">—</span>
           ),
       },
       {
@@ -128,14 +128,14 @@ export function DecisionsPage() {
         header: 'Создано',
         sortable: true,
         render: (row) => (
-          <span className="whitespace-nowrap text-[11px] text-ink-500">{formatDateTime(row.created_at)}</span>
+          <span className="whitespace-nowrap text-[0.6875rem] text-ink-500">{formatDateTime(row.created_at)}</span>
         ),
       },
       {
         key: 'version',
         header: 'Версия',
         align: 'right',
-        render: (row) => <span className="font-mono text-[11px] text-ink-400">v{row.version}</span>,
+        render: (row) => <span className="font-mono text-[0.6875rem] text-ink-400">v{row.version}</span>,
       },
     ],
     [],
@@ -274,7 +274,7 @@ export function DecisionsPage() {
         />
       )}
 
-      <div className="flex items-start gap-2 rounded-lg border border-ink-700/70 bg-ink-900/50 p-3 text-[11px] leading-relaxed text-ink-400">
+      <div className="flex items-start gap-2 rounded-lg border border-ink-700/70 bg-ink-900/50 p-3 text-[0.6875rem] leading-relaxed text-ink-400">
         <CalendarClock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-300" aria-hidden />
         <p>
           Изменение решения требует передачи текущей версии записи. При одновременном редактировании возвращается

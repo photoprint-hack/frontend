@@ -87,7 +87,7 @@ export function LoginPage() {
               </div>
               <div>
                 <p className="text-base font-semibold tracking-tight text-ink-50">Единая система управления</p>
-                <p className="text-[11px] uppercase tracking-[0.16em] text-ink-400">ООО «Фотопринт»</p>
+                <p className="text-[0.6875rem] uppercase tracking-[0.16em] text-ink-400">ООО «Фотопринт»</p>
               </div>
             </div>
 
@@ -113,7 +113,7 @@ export function LoginPage() {
             </ul>
           </div>
 
-          <div className="mt-10 flex items-center gap-2 rounded-lg border border-ink-700/70 bg-ink-850/60 px-3 py-2 text-[11px] text-ink-400">
+          <div className="mt-10 flex items-center gap-2 rounded-lg border border-ink-700/70 bg-ink-850/60 px-3 py-2 text-[0.6875rem] text-ink-400">
             <ShieldAlert className="h-3.5 w-3.5 text-signal-warn" aria-hidden />
             Синтетические демонстрационные данные. Реальные персональные данные не используются.
           </div>
@@ -127,7 +127,7 @@ export function LoginPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-ink-50">Единая система управления</p>
-                <p className="text-[10px] uppercase tracking-[0.16em] text-ink-400">ООО «Фотопринт»</p>
+                <p className="text-[0.625rem] uppercase tracking-[0.16em] text-ink-400">ООО «Фотопринт»</p>
               </div>
             </div>
           </div>
@@ -180,10 +180,10 @@ export function LoginPage() {
 
           {USE_MOCKS && (
             <div className="mt-6 rounded-lg border border-ink-700/70 bg-ink-850/50 p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-300">
+              <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-300">
                 Демонстрационные роли
               </p>
-              <p className="mt-1 text-[11px] text-ink-400">
+              <p className="mt-1 text-[0.6875rem] text-ink-400">
                 Пароль для всех учётных записей: <span className="font-mono text-accent-300">{DEMO_PASSWORD}</span>
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -196,7 +196,7 @@ export function LoginPage() {
                       setValue('password', DEMO_PASSWORD, { shouldValidate: true });
                     }}
                     className={cn(
-                      'rounded-md border border-ink-600 bg-ink-800/60 px-2 py-1 text-[11px] text-ink-200 transition',
+                      'rounded-md border border-ink-600 bg-ink-800/60 px-2 py-1 text-[0.6875rem] text-ink-200 transition',
                       'hover:border-accent-400/50 hover:text-accent-200',
                     )}
                   >

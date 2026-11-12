@@ -127,7 +127,7 @@ export function DataQualityPage() {
             { label: 'Открытых проблем', value: formatNumber(data.open_issues), tone: 'text-signal-bad' },
           ].map((tile) => (
             <div key={tile.label} className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">{tile.label}</p>
+              <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">{tile.label}</p>
               <p className={cn('mt-1 text-lg font-semibold leading-none', tile.tone)}>{tile.value}</p>
             </div>
           ))}
@@ -166,7 +166,7 @@ export function DataQualityPage() {
                   <tr key={source.id}>
                     <td>
                       <p className="text-xs font-medium text-ink-100">{source.name}</p>
-                      <p className="text-[10px] text-ink-500">
+                      <p className="text-[0.625rem] text-ink-500">
                         {SOURCE_LABELS[source.code] ?? source.code} · {source.source_type}
                       </p>
                     </td>
@@ -262,9 +262,9 @@ export function DataQualityPage() {
                         ? 'Критическое расхождение'
                         : 'Нет данных'}
                 </Badge>
-                <span className="text-[10px] text-ink-500">Проверено {formatDateTime(recon.checked_at)}</span>
+                <span className="text-[0.625rem] text-ink-500">Проверено {formatDateTime(recon.checked_at)}</span>
               </div>
-              <p className="mt-2 text-[11px] leading-relaxed text-ink-500">
+              <p className="mt-2 text-[0.6875rem] leading-relaxed text-ink-500">
                 Период сверки: {recon.period.date_from} — {recon.period.date_to}. Порог: до 1% — предупреждение, свыше
                 1% — критическое расхождение.
               </p>
@@ -316,8 +316,8 @@ export function DataQualityPage() {
                     </Badge>
                   </div>
                 </div>
-                <p className="mt-1 text-[11px] leading-relaxed text-ink-300">{issue.description}</p>
-                <p className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-ink-500">
+                <p className="mt-1 text-[0.6875rem] leading-relaxed text-ink-300">{issue.description}</p>
+                <p className="mt-1 flex flex-wrap items-center gap-2 text-[0.625rem] text-ink-500">
                   <span className="inline-flex items-center gap-1">
                     <ServerCog className="h-3 w-3" aria-hidden />
                     {SOURCE_LABELS[issue.source] ?? issue.source}
@@ -333,7 +333,7 @@ export function DataQualityPage() {
         </Card>
       </div>
 
-      <p className="px-1 text-[11px] text-ink-500">
+      <p className="px-1 text-[0.6875rem] text-ink-500">
         Проверки выполняются на стороне Backend по расписанию и вручную. Импорт источника доступен только
         администратору, запуск проверки — администратору и аналитику.
       </p>

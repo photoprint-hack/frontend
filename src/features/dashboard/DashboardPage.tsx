@@ -63,7 +63,7 @@ function StatTile({
       <span className={cn('flex h-9 w-9 items-center justify-center rounded-lg border', toneClass)}>{icon}</span>
       <div className="min-w-0">
         <p className="text-lg font-semibold leading-none text-ink-50">{value}</p>
-        <p className="mt-1 truncate text-[11px] text-ink-300">{label}</p>
+        <p className="mt-1 text-[0.625rem] leading-snug text-ink-300 line-clamp-2">{label}</p>
       </div>
       <ArrowRight className="ml-auto h-3.5 w-3.5 shrink-0 text-ink-500 transition group-hover:text-accent-300" />
     </Link>
@@ -82,8 +82,8 @@ function AlertRow({ alert }: { alert: Alert }) {
           {ALERT_STATUS_LABELS[alert.status]}
         </Badge>
       </div>
-      <p className="line-clamp-2 text-[11px] leading-snug text-ink-400">{alert.description}</p>
-      <div className="flex flex-wrap items-center gap-2 text-[10px] text-ink-500">
+      <p className="line-clamp-2 text-[0.6875rem] leading-snug text-ink-400">{alert.description}</p>
+      <div className="flex flex-wrap items-center gap-2 text-[0.625rem] text-ink-500">
         <span className="text-signal-bad">{formatSignedPercent(alert.deviation_percent)}</span>
         <span>·</span>
         <span>{alert.department_name ?? 'Компания'}</span>
@@ -109,7 +109,7 @@ function DecisionRow({ decision }: { decision: Decision }) {
     >
       <div className="min-w-0">
         <p className="truncate text-xs font-medium text-ink-50">{decision.title}</p>
-        <p className="mt-0.5 truncate text-[11px] text-ink-400">
+        <p className="mt-0.5 truncate text-[0.6875rem] text-ink-400">
           {decision.owner.full_name} · срок {formatDate(decision.deadline)}
         </p>
       </div>
@@ -129,7 +129,7 @@ function TaskRow({ task }: { task: Task }) {
     >
       <div className="min-w-0">
         <p className="truncate text-xs font-medium text-ink-50">{task.title}</p>
-        <p className="mt-0.5 truncate text-[11px] text-ink-400">
+        <p className="mt-0.5 truncate text-[0.6875rem] text-ink-400">
           {task.assignee.full_name} · {formatDaysLeft(task.deadline)}
         </p>
       </div>
@@ -235,13 +235,13 @@ export function DashboardPage() {
             <div className="mb-2 flex items-end justify-between gap-2">
               <h2 className="text-sm font-semibold tracking-tight text-ink-50">
                 Показатели компании
-                <span className="ml-2 text-[11px] font-normal text-ink-400">{data.kpis.length} KPI</span>
+                <span className="ml-2 text-[0.6875rem] font-normal text-ink-400">{data.kpis.length} KPI</span>
               </h2>
-              <Link to="/analytics" className="text-[11px] text-accent-300 hover:text-accent-200">
+              <Link to="/analytics" className="text-[0.6875rem] text-accent-300 hover:text-accent-200">
                 Перейти к аналитике
               </Link>
             </div>
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 min-[2100px]:grid-cols-4">
               {data.kpis.map((kpi) => (
                 <KpiCard key={kpi.code} kpi={kpi} />
               ))}
@@ -255,7 +255,7 @@ export function DashboardPage() {
                 subtitle="Критические отклонения по выбранному контексту"
                 icon={<AlertTriangle className="h-4 w-4" />}
                 action={
-                  <Link to="/alerts" className="text-[11px] text-accent-300 hover:text-accent-200">
+                  <Link to="/alerts" className="text-[0.6875rem] text-accent-300 hover:text-accent-200">
                     Все отклонения
                   </Link>
                 }
@@ -281,7 +281,7 @@ export function DashboardPage() {
                 subtitle="Что уже взято в работу"
                 icon={<ShieldCheck className="h-4 w-4" />}
                 action={
-                  <Link to="/decisions" className="text-[11px] text-accent-300 hover:text-accent-200">
+                  <Link to="/decisions" className="text-[0.6875rem] text-accent-300 hover:text-accent-200">
                     Реестр
                   </Link>
                 }
@@ -307,7 +307,7 @@ export function DashboardPage() {
                 subtitle="Конкретные действия исполнителей"
                 icon={<ListChecks className="h-4 w-4" />}
                 action={
-                  <Link to="/tasks" className="text-[11px] text-accent-300 hover:text-accent-200">
+                  <Link to="/tasks" className="text-[0.6875rem] text-accent-300 hover:text-accent-200">
                     Реестр
                   </Link>
                 }
@@ -351,8 +351,8 @@ export function DashboardPage() {
                       </td>
                       <td className="whitespace-nowrap text-xs">{formatUnit(kpi.actual, kpi.unit)}</td>
                       <td className="whitespace-nowrap text-xs text-ink-300">{formatUnit(kpi.target, kpi.unit)}</td>
-                      <td className="text-[11px] leading-snug text-ink-400">{kpi.formula}</td>
-                      <td className="whitespace-nowrap text-[11px] text-ink-400">{kpi.source.join(', ')}</td>
+                      <td className="text-[0.6875rem] leading-snug text-ink-400">{kpi.formula}</td>
+                      <td className="whitespace-nowrap text-[0.6875rem] text-ink-400">{kpi.source.join(', ')}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -18,9 +18,9 @@ import { cn } from '@/lib/utils/cn';
 function Metric({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-      <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">{label}</p>
+      <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">{label}</p>
       <p className="mt-1 text-lg font-semibold leading-none text-ink-50">{value}</p>
-      {hint && <p className="mt-1 text-[10px] text-ink-500">{hint}</p>}
+      {hint && <p className="mt-1 text-[0.625rem] text-ink-500">{hint}</p>}
     </div>
   );
 }
@@ -123,14 +123,14 @@ export function SalesPage() {
                     const width = max > 0 ? Math.max(6, (stage.count / max) * 100) : 6;
                     return (
                       <div key={stage.code} className="space-y-1">
-                        <div className="flex items-center justify-between gap-2 text-[11px]">
+                        <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
                           <span className="text-ink-200">
                             <span className="mr-1.5 text-ink-500">{index + 1}.</span>
                             {stage.name}
                           </span>
                           <span className="flex items-center gap-2 text-ink-400">
                             <span className="font-medium text-ink-100">{formatNumber(stage.count)}</span>
-                            <span className="text-[10px]">
+                            <span className="text-[0.625rem]">
                               {stage.conversion_from_previous_percent === null
                                 ? '—'
                                 : formatPercent(stage.conversion_from_previous_percent)}
@@ -149,7 +149,7 @@ export function SalesPage() {
                       </div>
                     );
                   })}
-                  <div className="flex items-center justify-between border-t border-ink-800 pt-2 text-[11px] text-ink-400">
+                  <div className="flex items-center justify-between border-t border-ink-800 pt-2 text-[0.6875rem] text-ink-400">
                     <span>Общая конверсия когорты</span>
                     <span className="font-semibold text-signal-ok">
                       {formatPercent(funnel.data.conversion_percent)}
@@ -190,9 +190,9 @@ export function SalesPage() {
               <div className="mt-3 grid grid-cols-3 gap-2">
                 {data.segments.map((segment) => (
                   <div key={segment.code} className="rounded-md border border-ink-700/60 bg-ink-850/50 p-2">
-                    <p className="truncate text-[10px] text-ink-400">{SEGMENT_LABELS[segment.code] ?? segment.code}</p>
+                    <p className="truncate text-[0.625rem] text-ink-400">{SEGMENT_LABELS[segment.code] ?? segment.code}</p>
                     <p className="mt-0.5 text-sm font-semibold text-ink-50">{formatNumber(segment.orders_count)}</p>
-                    <p className="text-[10px] text-ink-500">{formatMoney(segment.revenue)}</p>
+                    <p className="text-[0.625rem] text-ink-500">{formatMoney(segment.revenue)}</p>
                   </div>
                 ))}
               </div>

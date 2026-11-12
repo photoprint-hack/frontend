@@ -25,6 +25,7 @@ import { CustomerDetailPage } from '@/features/customers/CustomerDetailPage';
 import { NotFoundPage } from '@/features/errors/NotFoundPage';
 import { ForbiddenPage } from '@/features/errors/ForbiddenPage';
 import { HomeRedirect } from '@/app/HomeRedirect';
+import { ImpactMapPage } from '@/features/impact-map/ImpactMapPage';
 
 export function AppRoutes() {
   return (
@@ -93,6 +94,14 @@ export function AppRoutes() {
           element={
             <RequireCapability capability="bi.view">
               <AnalyticsPage />
+            </RequireCapability>
+          }
+        />
+        <Route
+          path="/impact-map"
+          element={
+            <RequireCapability capability="impactMap.view">
+              <ImpactMapPage />
             </RequireCapability>
           }
         />

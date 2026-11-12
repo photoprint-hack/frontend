@@ -28,7 +28,7 @@ function WeekCard({ week, max }: { week: ForecastWeek; max: number }) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Неделя</p>
+          <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">Неделя</p>
           <p className="mt-0.5 text-sm font-semibold text-ink-50">
             {formatShortDate(week.week_start)} — {formatShortDate(week.week_end)}
           </p>
@@ -40,7 +40,7 @@ function WeekCard({ week, max }: { week: ForecastWeek; max: number }) {
 
       <div className="mt-3 space-y-2">
         <div>
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-[0.6875rem]">
             <span className="text-ink-300">Спрос (прогноз)</span>
             <span className="font-medium text-ink-100">{formatHours(week.demand)}</span>
           </div>
@@ -49,7 +49,7 @@ function WeekCard({ week, max }: { week: ForecastWeek; max: number }) {
           </div>
         </div>
         <div>
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-[0.6875rem]">
             <span className="text-ink-300">Доступная мощность</span>
             <span className="font-medium text-ink-100">{formatHours(week.available_capacity)}</span>
           </div>
@@ -62,7 +62,7 @@ function WeekCard({ week, max }: { week: ForecastWeek; max: number }) {
         </div>
       </div>
 
-      <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-ink-800/80 pt-2 text-[10px]">
+      <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-ink-800/80 pt-2 text-[0.625rem]">
         <div>
           <dt className="text-ink-500">Дефицит</dt>
           <dd className={cn('font-semibold', week.is_deficit ? 'text-signal-bad' : 'text-ink-300')}>
@@ -138,7 +138,7 @@ export function ForecastPage() {
               </Button>
             }
           />
-          <p className="mt-2 text-center text-[11px] leading-relaxed text-ink-500">
+          <p className="mt-2 text-center text-[0.6875rem] leading-relaxed text-ink-500">
             Прогноз строится только при наличии истории заказов за четыре полные недели и плана доступной мощности
             на будущие недели. Значения не подменяются нулями — интерфейс явно сообщает об отсутствии данных.
           </p>
@@ -149,25 +149,25 @@ export function ForecastPage() {
         <>
           <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
             <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Недель с дефицитом</p>
+              <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">Недель с дефицитом</p>
               <p className={cn('mt-1 text-lg font-semibold leading-none', deficitWeeks.length > 0 ? 'text-signal-bad' : 'text-signal-ok')}>
                 {deficitWeeks.length} из {data.items.length}
               </p>
             </div>
             <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Суммарный спрос</p>
+              <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">Суммарный спрос</p>
               <p className="mt-1 text-lg font-semibold leading-none text-ink-50">
                 {formatHours(data.items.reduce((sum, item) => sum + (item.demand ?? 0), 0))}
               </p>
             </div>
             <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Суммарная мощность</p>
+              <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">Суммарная мощность</p>
               <p className="mt-1 text-lg font-semibold leading-none text-ink-50">
                 {formatHours(data.items.reduce((sum, item) => sum + (item.available_capacity ?? 0), 0))}
               </p>
             </div>
             <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Первый дефицит</p>
+              <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">Первый дефицит</p>
               <p className="mt-1 text-sm font-semibold leading-tight text-ink-50">
                 {data.first_deficit_week ? formatDate(data.first_deficit_week) : 'не прогнозируется'}
               </p>
@@ -181,11 +181,11 @@ export function ForecastPage() {
                 <p className="text-xs font-semibold text-signal-bad">
                   Дефицит мощности с недели {formatDate(data.first_deficit_week)}
                 </p>
-                <p className="mt-0.5 text-[11px] leading-relaxed text-ink-200">
+                <p className="mt-0.5 text-[0.6875rem] leading-relaxed text-ink-200">
                   Требуется решение: перераспределить смены, добавить оборудование или перенести сроки. Создайте
                   управленческое решение, чтобы зафиксировать ответственного и срок.
                 </p>
-                <Link to="/decisions/new" className="link-quiet mt-1.5 inline-block text-[11px]">
+                <Link to="/decisions/new" className="link-quiet mt-1.5 inline-block text-[0.6875rem]">
                   Создать решение по дефициту
                 </Link>
               </div>
@@ -247,7 +247,7 @@ export function ForecastPage() {
       )}
 
       {data && (
-        <div className="flex items-start gap-2 rounded-lg border border-ink-700/70 bg-ink-900/50 p-3 text-[11px] leading-relaxed text-ink-400">
+        <div className="flex items-start gap-2 rounded-lg border border-ink-700/70 bg-ink-900/50 p-3 text-[0.6875rem] leading-relaxed text-ink-400">
           <CalendarClock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-300" aria-hidden />
           <p>
             Метод расчёта: <span className="font-mono text-ink-200">{data.method ?? 'four_week_average'}</span> —

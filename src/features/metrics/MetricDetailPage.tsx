@@ -119,7 +119,7 @@ function HistoryChart({
           </>
         )}
       </svg>
-      <div className="flex items-center gap-4 px-2 pb-1 text-[10px] text-ink-400">
+      <div className="flex items-center gap-4 px-2 pb-1 text-[0.625rem] text-ink-400">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-0.5 w-4 rounded bg-accent-400" /> факт ({unit})
         </span>
@@ -217,21 +217,21 @@ export function MetricDetailPage() {
 
       <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 xl:grid-cols-5">
         <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Факт</p>
+          <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">Факт</p>
           <p className="mt-1 truncate text-lg font-semibold leading-none text-ink-50">{formatUnit(kpi.actual, kpi.unit)}</p>
         </div>
         <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">План</p>
+          <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">План</p>
           <p className="mt-1 truncate text-lg font-semibold leading-none text-ink-50">{formatUnit(kpi.target, kpi.unit)}</p>
         </div>
         <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Выполнение</p>
+          <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">Выполнение</p>
           <p className="mt-1 truncate text-lg font-semibold leading-none text-ink-50">
             {formatPercent(kpi.achievement_percent)}
           </p>
         </div>
         <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Отклонение</p>
+          <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">Отклонение</p>
           <p
             className={cn(
               'mt-1 flex items-center gap-1 truncate text-lg font-semibold leading-none',
@@ -249,20 +249,20 @@ export function MetricDetailPage() {
           </p>
         </div>
         <div className="rounded-lg border border-ink-700/70 bg-ink-850/60 p-3">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Прогноз</p>
+          <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-ink-400">Прогноз</p>
           <p className="mt-1 truncate text-lg font-semibold leading-none text-accent-300">
             {formatUnit(kpi.forecast, kpi.unit)}
           </p>
-          <p className="mt-1 text-[10px] text-ink-500">{kpi.forecast_method ?? 'метод не применялся'}</p>
+          <p className="mt-1 text-[0.625rem] text-ink-500">{kpi.forecast_method ?? 'метод не применялся'}</p>
         </div>
       </div>
 
       {kpi.reason && (
-        <div className="flex items-start gap-2 rounded-lg border border-signal-warn/40 bg-signal-warn/10 p-3 text-[11px] leading-relaxed text-ink-200">
+        <div className="flex items-start gap-2 rounded-lg border border-signal-warn/40 bg-signal-warn/10 p-3 text-[0.6875rem] leading-relaxed text-ink-200">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-signal-warn" aria-hidden />
           <p>
             <span className="font-semibold text-signal-warn">Причина статуса:</span> {kpi.reason}
-            {kpi.reason_code && <span className="ml-1 font-mono text-[10px] text-ink-400">({kpi.reason_code})</span>}
+            {kpi.reason_code && <span className="ml-1 font-mono text-[0.625rem] text-ink-400">({kpi.reason_code})</span>}
           </p>
         </div>
       )}
@@ -315,7 +315,7 @@ export function MetricDetailPage() {
                     <tbody>
                       {[...history.data.items].reverse().map((point) => (
                         <tr key={point.period_start}>
-                          <td className="whitespace-nowrap text-[11px] text-ink-300">
+                          <td className="whitespace-nowrap text-[0.6875rem] text-ink-300">
                             {formatDate(point.period_start)} — {formatDate(point.period_end)}
                           </td>
                           <td className="whitespace-nowrap text-right text-xs">{formatUnit(point.actual, kpi.unit)}</td>
@@ -337,15 +337,15 @@ export function MetricDetailPage() {
 
         <Card>
           <CardHeader title="Методика расчёта" subtitle="Формула и источники" icon={<BookOpen className="h-4 w-4" />} />
-          <dl className="space-y-3 text-[11px]">
+          <dl className="space-y-3 text-[0.6875rem]">
             <div>
-              <dt className="text-[10px] uppercase tracking-[0.08em] text-ink-400">Формула</dt>
-              <dd className="mt-0.5 rounded-md bg-ink-850/60 p-2 font-mono text-[10px] leading-relaxed text-ink-200">
+              <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">Формула</dt>
+              <dd className="mt-0.5 rounded-md bg-ink-850/60 p-2 font-mono text-[0.625rem] leading-relaxed text-ink-200">
                 {kpi.formula}
               </dd>
             </div>
             <div>
-              <dt className="text-[10px] uppercase tracking-[0.08em] text-ink-400">Источники</dt>
+              <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">Источники</dt>
               <dd className="mt-0.5 flex flex-wrap gap-1">
                 {kpi.source.map((source) => (
                   <Badge key={source} tone="info">
@@ -355,11 +355,11 @@ export function MetricDetailPage() {
               </dd>
             </div>
             <div>
-              <dt className="text-[10px] uppercase tracking-[0.08em] text-ink-400">Категория</dt>
+              <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">Категория</dt>
               <dd className="mt-0.5 text-ink-200">{kpi.category}</dd>
             </div>
             <div>
-              <dt className="text-[10px] uppercase tracking-[0.08em] text-ink-400">Направление</dt>
+              <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">Направление</dt>
               <dd className="mt-0.5 text-ink-200">
                 {kpi.direction === 'higher_is_better'
                   ? 'Чем выше, тем лучше'
@@ -371,18 +371,18 @@ export function MetricDetailPage() {
               </dd>
             </div>
             <div>
-              <dt className="text-[10px] uppercase tracking-[0.08em] text-ink-400">Данные источника</dt>
+              <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">Данные источника</dt>
               <dd className="mt-0.5 text-ink-200">{formatDateTime(kpi.source_updated_at)}</dd>
             </div>
             <div>
-              <dt className="text-[10px] uppercase tracking-[0.08em] text-ink-400">Расчёт выполнен</dt>
+              <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">Расчёт выполнен</dt>
               <dd className="mt-0.5 text-ink-200">{formatDateTime(kpi.updated_at)}</dd>
             </div>
           </dl>
           {kpi.notices.length > 0 && (
             <ul className="mt-3 space-y-1 border-t border-ink-800/80 pt-2">
               {kpi.notices.map((notice) => (
-                <li key={notice} className="text-[10px] leading-relaxed text-ink-400">
+                <li key={notice} className="text-[0.625rem] leading-relaxed text-ink-400">
                   • {notice}
                 </li>
               ))}
@@ -479,7 +479,7 @@ export function MetricDetailPage() {
                           {formatSignedPercent(row.deviation_percent)}
                         </td>
                         <td className="text-right text-xs text-ink-300">{row.source_records_count}</td>
-                        <td className="max-w-[220px] text-[11px] text-ink-300">
+                        <td className="max-w-[220px] text-[0.6875rem] text-ink-300">
                           {row.cause ?? <span className="text-ink-500">—</span>}
                           {row.cause_status === 'requires_review' && (
                             <Badge tone="warn" className="ml-1">
@@ -487,7 +487,7 @@ export function MetricDetailPage() {
                             </Badge>
                           )}
                         </td>
-                        <td className="text-[11px]">
+                        <td className="text-[0.6875rem]">
                           {row.links.length === 0 ? (
                             <span className="text-ink-500">—</span>
                           ) : (
@@ -521,7 +521,7 @@ export function MetricDetailPage() {
         )}
       </Card>
 
-      <p className="px-1 text-[11px] text-ink-500">
+      <p className="px-1 text-[0.6875rem] text-ink-500">
         Контекст: {formatDate(kpi.context.date_from)} — {formatDate(kpi.context.date_to)}, часовой пояс{' '}
         {kpi.context.timezone}. Все расчёты выполняются на стороне Backend; интерфейс не пересчитывает значения.
       </p>

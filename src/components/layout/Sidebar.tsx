@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   ListChecks,
   LogOut,
+  Network,
   ShieldCheck,
   TrendingUp,
   Users,
@@ -41,6 +42,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       items: [
         { to: '/dashboard', label: 'Обзор компании', icon: LayoutDashboard, visible: visibility.dashboard },
         { to: '/analytics', label: 'Аналитика', icon: BarChart3, visible: visibility.analytics },
+        { to: '/impact-map', label: 'Карта влияния', icon: Network, visible: visibility.impactMap },
       ],
     },
     {
@@ -82,7 +84,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       />
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-[264px] flex-col border-r border-ink-700/70 bg-ink-900 transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-ink-700/70 bg-ink-900 transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full',
         )}
         aria-label="Основная навигация"
@@ -94,7 +96,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             </div>
             <div className="leading-tight">
               <p className="text-sm font-semibold tracking-tight text-ink-50">Фотопринт</p>
-              <p className="text-[10px] uppercase tracking-[0.16em] text-ink-400">Management OS</p>
+              <p className="text-[0.625rem] uppercase tracking-[0.16em] text-ink-400">Management OS</p>
             </div>
           </div>
           <button
@@ -122,7 +124,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                         onClick={onClose}
                         className={({ isActive }) =>
                           cn(
-                            'group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors',
+                            'group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.8125rem] font-medium transition-colors',
                             isActive
                               ? 'bg-accent-500/12 text-accent-200 ring-1 ring-inset ring-accent-400/30'
                               : 'text-ink-200 hover:bg-ink-800/70 hover:text-ink-50',
@@ -148,12 +150,12 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
 
         <div className="border-t border-ink-700/70 p-3">
           <div className="flex items-center gap-2.5 rounded-lg bg-ink-850/70 p-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-[11px] font-semibold text-accent-200 ring-1 ring-accent-400/30">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-[0.6875rem] font-semibold text-accent-200 ring-1 ring-accent-400/30">
               {initials(user?.full_name ?? '—')}
             </div>
             <div className="min-w-0 flex-1 leading-tight">
               <p className="truncate text-xs font-medium text-ink-50">{user?.full_name}</p>
-              <p className="truncate text-[10px] text-ink-400">{role ? ROLE_LABELS[role] : ''}</p>
+              <p className="truncate text-[0.625rem] text-ink-400">{role ? ROLE_LABELS[role] : ''}</p>
             </div>
             <button
               type="button"
@@ -165,7 +167,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
               <LogOut className="h-4 w-4" />
             </button>
           </div>
-          <p className="mt-2 flex items-start gap-1.5 px-1 text-[10px] leading-relaxed text-ink-500">
+          <p className="mt-2 flex items-start gap-1.5 px-1 text-[0.625rem] leading-relaxed text-ink-500">
             <ClipboardCheck className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
             Синтетические демонстрационные данные
           </p>

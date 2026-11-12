@@ -1,5 +1,6 @@
 import type { MockContext } from './handlers';
 import * as handlers from './handlers';
+import { findImpactPath, getImpactGraph, getImpactNeighbors, getImpactNode } from './impact-map';
 
 export interface MockRequest {
   method: string;
@@ -81,6 +82,19 @@ export async function handleMockRequest(request: MockRequest): Promise<MockRespo
   }
 
   if (path === '/dashboard') return { status: 200, data: envelope(handlers.dashboard(params, ctx)) };
+
+  // Business Impact Map v2 mock API; scoped per current mock role.
+  if (path === '/impact-map' && method === 'GET') return { status: 200, data: envelope(getImpactGraph(params, ctx)) };
+  if (path === '/impact-map/paths' && method === 'GET') return { status: 200, data: envelope(findImpactPath(params, ctx)) };
+  if (path === '/impact-map/analyze' && method === 'POST') {
+    throw new handlers.MockHttpError(503, 'AI_UNAVAILABLE', 'AI-анализ станет доступен после подключения Backend и OpenRouter. Карта и поиск связей работают в демо-режиме.');
+  }
+  if (segments[0] === 'impact-map' && segments[1] === 'nodes' && segments[3] === 'neighbors' && method === 'GET') {
+    return { status: 200, data: envelope(getImpactNeighbors(segments[2]!, params, ctx)) };
+  }
+  if (segments[0] === 'impact-map' && segments[1] === 'nodes' && segments.length === 3 && method === 'GET') {
+    return { status: 200, data: envelope(getImpactNode(segments[2]!, params, ctx)) };
+  }
 
   if (path === '/orders') return { status: 200, data: handlers.listOrders(params, ctx) };
   if (segments[0] === 'orders' && segments[2] === 'events') {
