@@ -90,8 +90,9 @@ function impactSides(graph: ImpactGraph, root: string | null) {
   return { upstream: walk(false), downstream: walk(true) };
 }
 
-function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge }: {
+function ImpactCanvas({ graph, selectedNode, selectedEdge, showAllEdges, path, onNode, onEdge }: {
   graph: ImpactGraph; selectedNode: string | null; selectedEdge: string | null;
+  showAllEdges: boolean;
   path: ImpactPath | null; onNode: (node: ImpactNode) => void; onEdge: (edge: ImpactEdge) => void;
 }) {
   const [view, setView] = useState({ x: 0, y: 0, scale: 1 });
@@ -101,6 +102,25 @@ function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge 
   const pathNodeIds = new Set(path?.nodes.map((node) => node.id) ?? []);
   const pathEdgeIds = new Set(path?.edges.map((edge) => edge.id) ?? []);
   const { upstream, downstream } = impactSides(graph, selectedNode);
+  const directUpstream = new Set(graph.edges.filter((edge) => edge.target === selectedNode).map((edge) => edge.source));
+  const directDownstream = new Set(graph.edges.filter((edge) => edge.source === selectedNode).map((edge) => edge.target));
+  const edgeSource = graph.edges.find((edge) => edge.id === selectedEdge)?.source;
+  const edgeTarget = graph.edges.find((edge) => edge.id === selectedEdge)?.target;
+  const visibleEdgeIds = new Set<string>();
+  if (selectedNode && !showAllEdges) {
+    const visited = new Set([selectedNode]);
+    const queue = [selectedNode];
+    while (queue.length) {
+      const current = queue.shift()!;
+      graph.edges.forEach((edge) => {
+        if (edge.source !== current && edge.target !== current) return;
+        const next = edge.source === current ? edge.target : edge.source;
+        if (edge.source === selectedNode || edge.target === selectedNode) visibleEdgeIds.add(edge.id);
+        if (!visited.has(next)) { visited.add(next); visibleEdgeIds.add(edge.id); queue.push(next); }
+      });
+    }
+  }
+  const renderEdges = selectedNode && !showAllEdges ? graph.edges.filter((edge) => visibleEdgeIds.has(edge.id)) : graph.edges;
   const scaleBy = (delta: number) => setView((current) => ({ ...current, scale: Math.max(0.55, Math.min(1.65, current.scale + delta)) }));
 
   return (
@@ -135,18 +155,18 @@ function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge 
           {Object.entries(EVIDENCE_COLOR).map(([evidence, color]) => <marker key={evidence} id={`arrow-${evidence}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 9 5 L 0 9 z" fill={color} /></marker>)}
         </defs>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
-          {graph.edges.map((edge) => {
+          {renderEdges.map((edge) => {
             const source = nodeMap.get(edge.source); const target = nodeMap.get(edge.target);
             if (!source?.position || !target?.position) return null;
             const onPath = pathEdgeIds.has(edge.id);
-            const leadsToFocus = Boolean(selectedNode && edge.target === selectedNode || upstream.has(edge.source) && (upstream.has(edge.target) || edge.target === selectedNode));
-            const flowsFromFocus = Boolean(selectedNode && edge.source === selectedNode || downstream.has(edge.source) && downstream.has(edge.target));
-            const relationColor = leadsToFocus && flowsFromFocus ? '#c3a0ff' : leadsToFocus ? '#f2a65a' : flowsFromFocus ? '#53d3c2' : EVIDENCE_COLOR[edge.evidence_type];
-            const active = selectedEdge === edge.id || onPath || leadsToFocus || flowsFromFocus;
-            const dimmed = Boolean(path && !onPath) || Boolean(selectedNode && !active);
+            const leadsToFocus = Boolean(selectedNode && edge.target === selectedNode);
+            const flowsFromFocus = Boolean(selectedNode && edge.source === selectedNode);
+            const relationColor = selectedEdge === edge.id || onPath ? '#8db0ff' : leadsToFocus ? '#f2a65a' : flowsFromFocus ? '#53d3c2' : EVIDENCE_COLOR[edge.evidence_type];
+            const active = selectedEdge === edge.id || onPath;
+            const dimmed = Boolean(path && !onPath);
             return <g key={edge.id} data-map-edge="true" opacity={dimmed ? 0.12 : 1} onClick={(event) => { event.stopPropagation(); onEdge(edge); }} className="cursor-pointer transition-opacity">
               <path d={relationPath(source, target)} fill="none" stroke="transparent" strokeWidth="18" />
-              <path d={relationPath(source, target)} fill="none" stroke={onPath ? '#8db0ff' : relationColor} strokeWidth={active ? 4.5 : 1.7} strokeOpacity={active ? 1 : 0.58} strokeDasharray={edge.evidence_type === 'hypothesis' ? '7 6' : edge.evidence_type === 'correlated' ? '3 5' : undefined} markerEnd={`url(#arrow-${edge.evidence_type})`} filter={active ? 'url(#map-glow)' : undefined} />
+              <path d={relationPath(source, target)} fill="none" stroke={relationColor} strokeWidth={selectedEdge === edge.id ? 5 : onPath ? 3.5 : leadsToFocus || flowsFromFocus ? 2.6 : 1.5} strokeOpacity={active || leadsToFocus || flowsFromFocus ? 0.95 : 0.38} strokeDasharray={edge.evidence_type === 'hypothesis' ? '7 6' : edge.evidence_type === 'correlated' ? '3 5' : undefined} markerEnd={`url(#arrow-${edge.evidence_type})`} filter={active ? 'url(#map-glow)' : undefined} />
               {(selectedEdge === edge.id || onPath) && <text fontSize="11" fontWeight="700" paintOrder="stroke" stroke="#080d16" strokeWidth="4" fill="#e5edff" textAnchor="middle" x={(source.position.x + target.position.x) / 2} y={(source.position.y + target.position.y) / 2 - 9}>{RELATION_LABEL[edge.type]}</text>}
             </g>;
           })}
@@ -154,18 +174,20 @@ function ImpactCanvas({ graph, selectedNode, selectedEdge, path, onNode, onEdge 
             const position = node.position;
             if (!position) return null;
             const active = selectedNode === node.id;
+            const edgeEndpoint = node.id === edgeSource || node.id === edgeTarget;
             const onPath = pathNodeIds.has(node.id);
-            const inUpstream = upstream.has(node.id);
-            const inDownstream = downstream.has(node.id);
-            const dimmed = Boolean(path && !onPath) || Boolean(selectedNode && !active && !inUpstream && !inDownstream);
+            const inUpstream = directUpstream.has(node.id);
+            const inDownstream = directDownstream.has(node.id);
+            const indirect = upstream.has(node.id) || downstream.has(node.id);
+            const dimmed = Boolean(path && !onPath) || Boolean(selectedNode && !active && !indirect);
             const relationColor = inUpstream && inDownstream ? '#c3a0ff' : inUpstream ? '#f2a65a' : '#53d3c2';
             const actual = node.type === 'metric' ? node.context?.actual : null;
             const target = node.type === 'metric' ? node.context?.target : null;
             const unit = node.type === 'metric' ? textValue(node.context?.unit) : '';
             const valueText = actual === null || actual === undefined ? '' : `${formatUnit(typeof actual === 'number' ? actual : null, unit)}${target === null || target === undefined ? '' : ` / ${formatUnit(typeof target === 'number' ? target : null, unit)}`}`;
             return <g key={node.id} data-map-node="true" opacity={dimmed ? 0.24 : 1} transform={`translate(${position.x - NODE_W / 2},${position.y - NODE_H / 2})`} className="cursor-pointer transition-opacity" onClick={(event) => { event.stopPropagation(); onNode(node); }} role="button" tabIndex={0} aria-label={`${KIND_LABEL[node.type]}: ${node.label}`} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onNode(node); } }}>
-              {(active || inUpstream || inDownstream) && <rect x="-7" y="-7" width={NODE_W + 14} height={NODE_H + 14} rx="18" fill={active ? '#5790ff' : relationColor} fillOpacity={active ? '.16' : '.10'} stroke={active ? '#83a9ff' : relationColor} strokeWidth={active ? 2.5 : 1.8} />}
-              <rect width={NODE_W} height={NODE_H} rx="13" fill={active ? '#182947' : inUpstream || inDownstream ? '#17242d' : '#111925'} stroke={active || onPath ? '#8fb0ff' : inUpstream || inDownstream ? relationColor : KIND_COLOR[node.type]} strokeWidth={active ? 4 : onPath ? 3 : inUpstream || inDownstream ? 3 : 1.2} strokeOpacity={active || onPath || inUpstream || inDownstream ? 1 : 0.58} filter={active || inUpstream || inDownstream ? 'url(#map-glow)' : undefined} />
+              {(active || edgeEndpoint || inUpstream || inDownstream) && <rect x="-7" y="-7" width={NODE_W + 14} height={NODE_H + 14} rx="18" fill={active ? '#5790ff' : edgeEndpoint ? '#8db0ff' : relationColor} fillOpacity={active || edgeEndpoint ? '.16' : '.08'} stroke={active ? '#83a9ff' : edgeEndpoint ? '#b8ceff' : relationColor} strokeWidth={active || edgeEndpoint ? 2.5 : 1.4} />}
+              <rect width={NODE_W} height={NODE_H} rx="13" fill={active ? '#182947' : edgeEndpoint ? '#22324d' : inUpstream || inDownstream ? '#17242d' : '#111925'} stroke={active || edgeEndpoint || onPath ? '#8fb0ff' : inUpstream || inDownstream ? relationColor : KIND_COLOR[node.type]} strokeWidth={active || edgeEndpoint ? 4 : onPath ? 3 : inUpstream || inDownstream ? 2.5 : 1.2} strokeOpacity={active || edgeEndpoint || onPath || inUpstream || inDownstream ? 1 : 0.58} filter={active || edgeEndpoint ? 'url(#map-glow)' : undefined} />
               <rect x="1" y="1" width="4" height={NODE_H - 2} rx="2" fill={KIND_COLOR[node.type]} />
               <circle cx="19" cy="20" r="4" fill={KIND_COLOR[node.type]} />
               <text x="30" y="24" fontSize="10" letterSpacing=".5" fill="#9ba8bc">{KIND_LABEL[node.type].toLocaleUpperCase('ru-RU')}</text>
@@ -219,6 +241,7 @@ export function ImpactMapPage() {
   const [depth, setDepth] = useState(2);
   const [pathDirection, setPathDirection] = useState<ImpactDirection>('out');
   const [edgeTypes, setEdgeTypes] = useState<ImpactEdgeType[]>(EDGE_TYPES);
+  const [showAllEdges, setShowAllEdges] = useState(false);
   const [path, setPath] = useState<ImpactPath | null>(null);
   const [analysisError, setAnalysisError] = useState('');
   const map = useQuery({ queryKey: ['impact-map', user?.id, role, queryParams], queryFn: async () => (await impactMapApi.get(queryParams)).data, staleTime: 20_000 });
@@ -284,13 +307,14 @@ export function ImpactMapPage() {
               <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-400/30 bg-amber-400/10 px-2 py-1.5 text-[11px] text-amber-200"><i className="h-2 w-2 rounded-full bg-amber-300" />Что влияет на него</span>
               <span className="inline-flex items-center gap-1.5 rounded-md border border-teal-400/30 bg-teal-400/10 px-2 py-1.5 text-[11px] text-teal-200"><i className="h-2 w-2 rounded-full bg-teal-300" />На что влияет он</span>
               <div className="ml-auto inline-flex items-center gap-2 text-[11px] text-ink-400"><span>Связей по цепочке</span><button onClick={() => setDepth((value) => Math.max(1, value - 1))} disabled={depth <= 1} className="h-7 w-7 rounded-md border border-ink-700 disabled:opacity-40" aria-label="Уменьшить глубину">−</button><span className="w-4 text-center font-semibold text-ink-100">{depth}</span><button onClick={() => setDepth((value) => Math.min(3, value + 1))} disabled={depth >= 3} className="h-7 w-7 rounded-md border border-ink-700 disabled:opacity-40" aria-label="Увеличить глубину">+</button></div>
+              <button className="rounded-lg border border-ink-700 px-3 py-2 text-[11px] text-ink-300 hover:bg-ink-850" aria-pressed={showAllEdges} onClick={() => setShowAllEdges((value) => !value)}>{showAllEdges ? 'Скрыть лишние стрелки' : 'Показать все стрелки'}</button>
               <details className="relative"><summary className="cursor-pointer list-none rounded-lg border border-ink-700 px-3 py-2 text-[11px] text-ink-300 hover:bg-ink-850">Типы связей · {edgeTypes.length === EDGE_TYPES.length ? 'Все' : edgeTypes.length}</summary><div className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-ink-700 bg-ink-900 p-3 shadow-xl"><div className="mb-2 flex justify-between text-[11px]"><span className="font-medium text-ink-100">Оставить на карте</span><button className="text-accent-300" onClick={(event) => { event.preventDefault(); setEdgeTypes(EDGE_TYPES); }}>Выбрать все</button></div>{EDGE_TYPES.map((type) => <label key={type} className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-1.5 text-xs text-ink-300 hover:bg-ink-800"><input type="checkbox" checked={edgeTypes.includes(type)} onChange={(event) => setEdgeTypes((current) => event.target.checked ? [...current, type] : current.length > 1 ? current.filter((item) => item !== type) : current)} className="accent-blue-500" />{RELATION_LABEL[type]}</label>)}<p className="mt-2 text-[10px] text-ink-500">Оставьте хотя бы один тип. Фильтр применяется ко всему обходу и поиску пути.</p></div></details>
             </div>
             {neighbors.isFetching && <p className="text-[11px] text-ink-500">Обновляю связи в выбранном направлении…</p>}
             {neighbors.error && <p className="text-xs text-signal-warn">Не удалось раскрыть связи: {toApiError(neighbors.error).message}</p>}
           </Card>
           {selectedNode && <p className="rounded-lg border border-accent-500/20 bg-accent-500/5 px-3 py-2 text-xs text-ink-200">Показаны связи для <b>{selectedNode.label}</b>. <button className="ml-1 text-accent-300 hover:text-accent-200" onClick={() => { setSelectedNodeId(null); setPath(null); setSelectedEdgeId(null); }}>Сбросить фокус</button></p>}
-          <ImpactCanvas graph={activeGraph!} selectedNode={selectedNodeId} selectedEdge={selectedEdgeId} path={path} onNode={(node) => { setSelectedNodeId(node.id); setSelectedEdgeId(null); setPath(null); }} onEdge={(edge) => { setSelectedEdgeId(edge.id); setSelectedNodeId(null); setPath(null); }} />
+          <ImpactCanvas graph={activeGraph!} selectedNode={selectedNodeId} selectedEdge={selectedEdgeId} showAllEdges={showAllEdges} path={path} onNode={(node) => { setSelectedNodeId(node.id); setSelectedEdgeId(null); setPath(null); }} onEdge={(edge) => { setSelectedEdgeId(edge.id); setPath(null); }} />
           <div className="flex flex-wrap gap-x-4 gap-y-2 px-1">{(['verified','calculated','correlated','hypothesis'] as EvidenceType[]).map((type) => <EvidenceBadge key={type} type={type} />)}</div>
         </div>
         {selectedEdge ? <Card className="space-y-4"><div className="flex items-center justify-between"><h2 className="text-sm font-semibold text-ink-50">Связь</h2><button className="text-xs text-ink-400 hover:text-ink-100" onClick={() => setSelectedEdgeId(null)}>Закрыть</button></div><p className="text-sm text-ink-100">{RELATION_LABEL[selectedEdge.type]}</p><EvidenceBadge type={selectedEdge.evidence_type} /><p className="text-xs leading-relaxed text-ink-300">{selectedEdge.description}</p><div className="rounded-lg border border-ink-800 bg-ink-850 p-3 text-xs"><p className="text-ink-500">Источник связи</p><p className="mt-1 text-ink-100">{selectedEdge.source_label}</p><p className="mt-2 break-all font-mono text-[10px] text-ink-500">{selectedEdge.evidence_refs.join(', ') || 'Нет подтверждающих ссылок'}</p></div><p className="text-[11px] leading-relaxed text-ink-500">Стрелка показывает направление. У гипотезы штриховая линия; она не является подтверждённой причинностью.</p></Card> : <NodeDetails node={selectedNode} edges={connectedEdges} graph={activeGraph!} onClose={() => setSelectedNodeId(null)} onAnalyze={() => { setTab('analysis'); analyze.mutate(); }} />}
