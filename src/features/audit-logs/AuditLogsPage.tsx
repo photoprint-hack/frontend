@@ -1,18 +1,17 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { FileClock, Filter, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Filter } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { DataTable, Pagination, type Column } from '@/components/tables/DataTable';
-import { Card, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { SearchInput, Select } from '@/components/ui/Field';
-import { EmptyState, ErrorState } from '@/components/feedback/States';
+import { ErrorState } from '@/components/feedback/States';
 import { auditLogsApi } from '@/lib/api/endpoints';
 import { toApiError } from '@/lib/api/client';
 import { AUDIT_ACTION_LABELS } from '@/constants/labels';
 import { formatDateTime } from '@/lib/formatters';
-import { cn } from '@/lib/utils/cn';
 import type { AuditLog } from '@/types/api';
 
 const OBJECT_TYPES = ['decision', 'task', 'alert', 'order', 'user', 'metric', 'source', 'session'];
@@ -24,7 +23,8 @@ export function AuditLogsPage() {
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [selected, setSelected] = useState<AuditLog | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const query = useQuery({
     queryKey: ['audit-logs', search, action, objectType, status, page, pageSize],
@@ -94,6 +94,16 @@ export function AuditLogsPage() {
         <span className="font-mono text-[0.625rem] text-ink-500">{row.request_id.slice(0, 8)}</span>
       ),
     },
+    {
+      key: 'details',
+      header: '',
+      align: 'right',
+      render: () => (
+        <span className="inline-flex items-center gap-1 text-[0.6875rem] font-medium text-accent-300">
+          Открыть <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </span>
+      ),
+    },
   ];
 
   const error = query.error ? toApiError(query.error) : null;
@@ -102,7 +112,7 @@ export function AuditLogsPage() {
     <div className="space-y-4">
       <PageHeader
         title="Журнал действий"
-        description="Неизменяемый аудит: кто, когда и что изменил. Доступен только администратору и директору."
+        description="Неизменяемый аудит: кто, когда и что изменил. Нажмите на строку или «Открыть», чтобы перейти к полной записи. Доступен администратору и директору."
         meta={
           query.data ? (
             <>
@@ -195,11 +205,10 @@ export function AuditLogsPage() {
           columns={columns}
           rows={query.data?.items}
           rowKey={(row) => row.id}
-          selectedRowKey={selected?.id}
           loading={query.isLoading}
-          onRowClick={(row) => setSelected(row)}
+          onRowClick={(row) => navigate(`/audit-logs/${row.id}`, { state: { from: `${location.pathname}${location.search}` } })}
           emptyTitle="Записей нет"
-          emptyDescription="Измените фильтры — журнал заполняется автоматически при действиях в системе. Нажмите на запись, чтобы раскрыть детали ниже."
+          emptyDescription="Измените фильтры — журнал заполняется автоматически при действиях в системе."
           footer={
             query.data ? (
               <Pagination
@@ -218,79 +227,6 @@ export function AuditLogsPage() {
         />
       )}
 
-      <Card>
-        <CardHeader
-          title="Детали записи"
-          subtitle={selected ? `${AUDIT_ACTION_LABELS[selected.action] ?? selected.action} · ${formatDateTime(selected.created_at)}` : 'Выберите запись в таблице'}
-          icon={<FileClock className="h-4 w-4" />}
-          action={
-            selected ? (
-              <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>
-                Закрыть
-              </Button>
-            ) : null
-          }
-        />
-        {!selected ? (
-          <EmptyState
-            title="Запись не выбрана"
-            description="Нажмите на строку журнала: выбранная запись подсветится, а здесь появятся изменения и данные запроса."
-            icon={<ShieldCheck className="h-5 w-5" />}
-          />
-        ) : (
-          <div className="space-y-3">
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-[0.6875rem] sm:grid-cols-4">
-              {[
-                ['Пользователь', selected.actor?.full_name ?? 'Система'],
-                ['Тип актора', selected.actor_type],
-                ['Объект', `${selected.object_type}${selected.object_id ? ` / ${selected.object_id.slice(0, 8)}` : ''}`],
-                ['Результат', selected.status === 'success' ? 'успешно' : 'ошибка'],
-                ['IP', selected.ip_address ?? '—'],
-                ['Request ID', selected.request_id],
-                ['Время', formatDateTime(selected.created_at)],
-                ['Ошибка', selected.error_message ?? '—'],
-              ].map(([label, value]) => (
-                <div key={label} className="min-w-0">
-                  <dt className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{label}</dt>
-                  <dd className="mt-0.5 truncate font-medium text-ink-100" title={String(value)}>
-                    {value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-
-            <div className="grid gap-2 sm:grid-cols-2">
-              {(
-                [
-                  ['Было (old_values)', selected.old_values],
-                  ['Стало (new_values)', selected.new_values],
-                ] as const
-              ).map(([label, payload]) => (
-                <div key={label} className="rounded-lg border border-ink-700/60 bg-ink-850/50 p-2.5">
-                  <p className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">{label}</p>
-                  <pre
-                    className={cn(
-                      'mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-all font-mono text-[0.625rem] leading-relaxed',
-                      payload ? 'text-ink-200' : 'text-ink-500',
-                    )}
-                  >
-                    {payload ? JSON.stringify(payload, null, 2) : 'нет данных'}
-                  </pre>
-                </div>
-              ))}
-            </div>
-
-            {selected.details && (
-              <div className="rounded-lg border border-ink-700/60 bg-ink-850/50 p-2.5">
-                <p className="text-[0.625rem] uppercase tracking-[0.08em] text-ink-400">Дополнительно</p>
-                <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-all font-mono text-[0.625rem] leading-relaxed text-ink-200">
-                  {JSON.stringify(selected.details, null, 2)}
-                </pre>
-              </div>
-            )}
-          </div>
-        )}
-      </Card>
     </div>
   );
 }

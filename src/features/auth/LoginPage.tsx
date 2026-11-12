@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowRight, Compass, KeyRound, Mail, ShieldAlert } from 'lucide-react';
+import { ArrowRight, KeyRound, Mail, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { FieldShell, Input } from '@/components/ui/Field';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -12,6 +12,7 @@ import { homeRoute } from '@/lib/auth/rbac';
 import { ROLE_LABELS } from '@/constants/labels';
 import { cn } from '@/lib/utils/cn';
 import type { Role } from '@/types/api';
+import { CompassMark } from '@/components/brand/CompassMark';
 
 const schema = z.object({
   email: z.string().min(1, 'Укажите корпоративную почту').email('Некорректный формат почты'),
@@ -82,9 +83,7 @@ export function LoginPage() {
         <div className="hidden flex-col justify-between rounded-2xl border border-ink-700/70 bg-ink-900/60 p-6 shadow-card lg:flex xl:p-7">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent-400/30 bg-accent-500/10">
-                <Compass className="h-5 w-5 text-accent-300" aria-hidden />
-              </div>
+              <CompassMark className="h-10 w-10" />
               <div>
                 <p className="text-base font-semibold tracking-tight text-ink-50">Компас</p>
                 <p className="text-[0.6875rem] text-ink-400">Система управления компанией</p>
@@ -108,9 +107,7 @@ export function LoginPage() {
         <div className="surface p-5 sm:p-6">
           <div className="lg:hidden">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-accent-400/30 bg-accent-500/10">
-                <Compass className="h-4 w-4 text-accent-300" aria-hidden />
-              </div>
+              <CompassMark className="h-9 w-9" />
               <div>
                 <p className="text-sm font-semibold text-ink-50">Компас</p>
                 <p className="text-[0.625rem] text-ink-400">Видеть главное. Двигаться уверенно.</p>

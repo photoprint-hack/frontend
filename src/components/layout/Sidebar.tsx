@@ -5,7 +5,6 @@ import {
   Building2,
   CalendarClock,
   ClipboardCheck,
-  Compass,
   Database,
   FileClock,
   Gauge,
@@ -24,6 +23,7 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { navVisibility } from '@/lib/auth/rbac';
 import { ROLE_LABELS } from '@/constants/labels';
 import { initials } from '@/lib/formatters';
+import { CompassMark } from '@/components/brand/CompassMark';
 
 interface NavItem {
   to: string;
@@ -91,9 +91,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       >
         <div className="flex h-14 items-center justify-between gap-2 border-b border-ink-700/70 px-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-500/15 ring-1 ring-accent-400/40">
-              <Compass className="h-4 w-4 text-accent-300" aria-hidden />
-            </div>
+            <CompassMark className="h-8 w-8" />
             <div className="leading-tight">
               <p className="text-sm font-semibold tracking-tight text-ink-50">Компас</p>
               <p className="text-[0.625rem] text-ink-400">ООО «Фотопринт»</p>

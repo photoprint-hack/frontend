@@ -20,7 +20,6 @@ export interface DataTableProps<T> {
   rows: T[] | undefined;
   rowKey: (row: T) => string;
   onRowClick?: (row: T) => void;
-  selectedRowKey?: string;
   loading?: boolean;
   emptyTitle?: string;
   emptyDescription?: string;
@@ -38,7 +37,6 @@ export function DataTable<T>({
   rows,
   rowKey,
   onRowClick,
-  selectedRowKey,
   loading,
   emptyTitle = 'Ничего не найдено',
   emptyDescription = 'Измените фильтры или период, чтобы увидеть записи.',
@@ -113,6 +111,7 @@ export function DataTable<T>({
                   <tr
                     key={rowKey(row)}
                     onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    title={onRowClick ? 'Нажмите, чтобы открыть подробную запись' : undefined}
                     onKeyDown={
                       onRowClick
                         ? (event) => {
@@ -126,8 +125,7 @@ export function DataTable<T>({
                     tabIndex={onRowClick ? 0 : undefined}
                     role={onRowClick ? 'button' : undefined}
                     className={cn(
-                      onRowClick && 'cursor-pointer transition-colors hover:bg-ink-800/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-400',
-                      selectedRowKey === rowKey(row) && 'bg-accent-500/10 ring-1 ring-inset ring-accent-400/35',
+                      onRowClick && 'cursor-pointer transition-colors hover:bg-accent-500/10 focus-visible:bg-accent-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-400',
                       dense && '[&>td]:py-2',
                       loading && 'opacity-60',
                     )}
