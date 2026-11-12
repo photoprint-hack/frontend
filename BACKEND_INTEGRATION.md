@@ -93,7 +93,7 @@ npm run test:api
 npm run build
 ```
 
-На 2026-11-12: 15 frontend HTTP/geometry тестов прошли, TypeScript и production build
+На 2026-11-12: 18 frontend HTTP/geometry тестов прошли, TypeScript и production build
 успешны. Backend: 131 тест прошёл на отдельной временной PostgreSQL.
 Сборка сообщает о JS chunk больше 500 kB.
 

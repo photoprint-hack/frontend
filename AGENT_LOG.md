@@ -126,7 +126,7 @@ Axios + TanStack Query v5 + RHF + Zod + Sonner + Lucide. Контракт: **API
 ## 6. Как ревьюить себя перед коммитом
 
 ```bash
-cd /d D:\photoprint
+cd /path/to/photoprint-frontend/frontend
 npx tsc --noEmit      # 0 ошибок
 npm run build         # dist/ собирается
 npm run dev           # ручной прогон сценария из README
@@ -261,3 +261,19 @@ API отдаёт узлы без position; Canvas пропускал все уз
 TypeScript и build успешны, прежнее предупреждение chunk. Diff whitespace чист.
 Браузер/Computer Use не использовались, визуальная проверка не проводилась.
 По прямому запрету пользователя нет commit/push/staging; изменения только локальные.
+
+
+## 15. Сверка с ТЗ и инструкция запуска — 2026-11-12
+
+Проверены оба PDF ТЗ, frontend-маршруты, RBAC, API-контракт, live health и
+регрессионные наборы. Для трека 1 обязательные экраны и сценарии представлены;
+frontend автоматически не покрывает визуальный browser E2E.
+
+README заменён на проверяемую инструкцию с тремя режимами запуска и корректным
+путём к `photoprint-frontend/frontend`. Убраны неверный Windows-путь и устаревший
+счётчик тестов. Добавлен THIRD_PARTY_LICENSES.md; в истории KPI подписана
+группировка по кампаниям, исправлена подпись временного пароля пользователя.
+
+Проверки: `npm run test:api` — 18/18; `npm run build` — успешно; локальный Vite
+`http://127.0.0.1:5173/` — HTTP 200; live Backend `/health` — HTTP 200.
+Чистый `git diff --check`. Commit/push/deploy и Computer Use не выполнялись.

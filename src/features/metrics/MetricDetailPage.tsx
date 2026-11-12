@@ -47,6 +47,7 @@ const GROUP_LABELS: Record<string, string> = {
   product: 'По продуктам',
   order: 'По заказам',
   channel: 'По каналам',
+  campaign: 'По кампаниям',
   cause: 'По причинам',
 };
 

@@ -251,7 +251,7 @@ export function UsersPage() {
         <Card>
           <CardHeader
             title="Новый пользователь"
-            subtitle="Пароль выдаётся сотруднику и требует смены при первом входе (в реальном Backend)"
+            subtitle="Временный пароль задаёт администратор; после входа его следует передать сотруднику безопасным каналом"
             icon={<Plus className="h-4 w-4" />}
           />
           <form onSubmit={onSubmit} className="space-y-3" noValidate>
